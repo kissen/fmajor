@@ -20,7 +20,10 @@ func main() {
 	router.NotFoundHandler = Error(http.StatusNotFound, "")
 	router.MethodNotAllowedHandler = Error(http.StatusMethodNotAllowed, "")
 
-	if err := http.ListenAndServe(GetConfig().ListenAddress, router); err != nil {
+	addr := GetConfig().ListenAddress
+	log.Printf(`listening on add="%v"`, addr)
+
+	if err := http.ListenAndServe(addr, router); err != nil {
 		log.Fatal(err)
 	}
 }

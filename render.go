@@ -13,7 +13,7 @@ import (
 // because that function uses Render and I would prefer to avoid infinite
 // recursion.
 func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]interface{}) {
-	box := packr.NewBox("resources")
+	box := packr.NewBox("templates")
 
 	ts, err := template.New("base").Parse(box.String("base.tmpl"))
 	if err != nil {

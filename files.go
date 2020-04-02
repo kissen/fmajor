@@ -38,7 +38,7 @@ type File struct {
 	LocalPath string
 }
 
-// Return Size as a human-redable string.
+// Return Size as a human-readable string.
 func (f *File) HumanSize() string {
 	if f.Size < 0 {
 		// shouldn't happen, but who knows...
@@ -46,6 +46,11 @@ func (f *File) HumanSize() string {
 	} else {
 		return humanize.IBytes(uint64(f.Size))
 	}
+}
+
+// Return upload timestamp as human-readable string.
+func (f *File) HumanUploadedOn() string {
+	return f.UploadedOnUTC.Format("2006/01/02 15:04")
 }
 
 // Get a listing of all uploaded files.

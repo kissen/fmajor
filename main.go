@@ -11,6 +11,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", GetIndex).Methods("GET")
+	router.HandleFunc("/favicon.ico", GetFavicon).Methods("GET")
 	router.HandleFunc("/files/{file_id:.+}", GetFile).Methods("GET")
 	router.HandleFunc("/static/{resource_id:.+}", GetStatic).Methods("GET")
 	router.HandleFunc("/submit", PostSubmit).Methods("POST")

@@ -51,6 +51,11 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET /favicon.ico
+func GetFavicon(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/static/paperclip.svg", http.StatusPermanentRedirect)
+}
+
 // GET /files/{fileid}
 func GetFile(w http.ResponseWriter, r *http.Request) {
 	fileId, ok := mux.Vars(r)["file_id"]

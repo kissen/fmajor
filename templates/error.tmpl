@@ -4,9 +4,11 @@
 	Error {{.Status}}: {{.StatusText}}
 {{end}}
 
-{{define "body"}}
-	<h1>Error {{.Status}}: {{.StatusText}}</h1>
+{{define "main"}}
+	<h2>Error {{.Status}}: {{.StatusText}}</h2>
+
 	<p>{{.Description}}</p>
+
 	{{if .Cause}}
 		<code>{{.Cause}}</code>
 	{{end}}

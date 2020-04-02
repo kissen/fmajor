@@ -5,27 +5,24 @@
 {{end}}
 
 
-{{define "body"}}
-	<h1>fmajor</h1>
+{{define "main"}}
+	<div class="box">
+		<form enctype="multipart/form-data" action="/submit" method="post">
+			<input type="file" name="file" />
+			<input type="submit" value="Upload" />
+		</form>
+	</div>
 
-	<h2>Upload</h2>
-
-	<form enctype="multipart/form-data" action="/submit" method="post">
-		<input type="file" name="file" />
-		<input type="submit" value="Upload" />
-	</form>
-
-	<h2>Download a File</h2>
-
-	<ul>
 	{{range .Uploads}}
-		<li>
-			<a href="/files/{{.Id}}">{{.Name}}</a> ({{.HumanSize}})
-			<form action="/delete" method="post">
-				<input type="hidden" name="id" value="{{.Id}}" />
-				<input type="submit" value="Delete" />
-			</form>
-		</li>
+		<div class="box">
+		    <form action="/delete" method="post">
+			    <input type="hidden" name="id" value="{{.Id}}" />
+			    <input class="delete_button" type="image" title="Delete" src="/static/trash-2.svg">
+		    </form>
+		    <a href="/files/{{.Id}}">{{.Name}}</a>
+		    <div class="meta">
+			    {{.HumanUploadedOn}}, {{.HumanSize}}
+		    </div>
+		</div>
 	{{end}}
-	</ul>
 {{end}}

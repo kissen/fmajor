@@ -3,16 +3,26 @@
 <html>
 	<head>
 		<title>{{template "title" .}}</title>
-		<!--<link rel="icon" href="static/inbox.svg">-->
+		<link rel="icon" href="/static/paperclip.svg" type="image/svg+xml">
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=0.7">
 		<link rel=stylesheet href="/static/fmajor.css">
 	</head>
 
 	<body>
-		{{template "body" .}}
-	</body>
+		<header>
+		        <a href="/">
+				<h1>File Hosting Service</h1>
+		        </a>
+		</header>
 
-	Powered by <i>fmajor</i>.
+		<main>
+			{{template "main" .}}
+		</main>
+
+		<footer>
+			Powered by <a href="https://github.com/kissen/">fmajor</a>.
+		</footer>
+	</body>
 </html>
 {{end}}

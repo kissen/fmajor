@@ -1,7 +1,84 @@
+:root {
+    --accent-ink: white;
+    --accent: #083d77;
+    --ink: #323031;
+
+    --small: 12pt;
+    --medium: 16pt;
+    --large: 24pt;
+}
+
 * {
-	font-size: 12pt;
+    font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+header {
+    background-color: var(--accent);
+    color: var(--accent-ink);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+header a {
+    color: var(--accent-ink);
+    text-decoration: none;
 }
 
 h1 {
-	font-size: 24pt;
+    font-size: var(--large);
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-size: var(--large);
+    font-weight: bold;
+}
+
+main {
+    margin: auto;
+    max-width: 48em;
+    padding: 1em;
+    font-size: var(--medium);
+}
+
+.box {
+    padding: 1em;
+    background-color: var(--accent);
+    color: var(--accent-ink);
+    margin: 1em;
+}
+
+.box a {
+    color: var(--accent-ink);
+}
+
+input[type="file"] {
+    font-size: var(--medium);
+}
+
+input[type="submit"] {
+    font-size: var(--medium);
+    float: right;
+}
+
+.meta {
+    font-size: var(--small);
+}
+
+.delete_button {
+    float: right;
+}
+
+footer {
+    font-size: var(--small);
+    text-align: center;
 }

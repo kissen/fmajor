@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -78,6 +78,11 @@ func (f *File) HumanSize() string {
 // Return upload timestamp as human-readable string.
 func (f *File) HumanUploadedOn() string {
 	return f.UploadedOnUTC.Format("2006/01/02 15:04")
+}
+
+// The extension of the original filename.
+func (f *File) Ext() string {
+	return path.Ext(f.Name)
 }
 
 // Get a listing of all uploaded files.

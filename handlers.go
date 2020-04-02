@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 // GET /
@@ -63,6 +64,9 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 		DoError(w, r, http.StatusBadRequest, "missing file_id")
 		return
 	}
+
+	ext := path.Ext(fileId)
+	fileId = strings.TrimSuffix(fileId, ext)
 
 	LockRead()
 	defer UnlockRead()

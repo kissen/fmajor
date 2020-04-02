@@ -11,8 +11,8 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", GetIndex).Methods("GET")
-	router.HandleFunc("/static/{resourceid:.+}", GetStatic).Methods("GET")
-	router.HandleFunc("/files/{fileid:.+}", GetFile).Methods("GET")
+	router.HandleFunc("/files/{file_id:.+}", GetFile).Methods("GET")
+	router.HandleFunc("/static/{resource_id:.+}", GetStatic).Methods("GET")
 	router.HandleFunc("/submit", PostSubmit).Methods("POST")
 
 	router.NotFoundHandler = Error(http.StatusNotFound, "")

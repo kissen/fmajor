@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/gobuffalo/packr"
+	"github.com/gorilla/mux"
 	"github.com/kissen/httpstatus"
+	"io"
 	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -25,7 +28,7 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 	filename := path.Base(r.URL.Path)
 
 	if !box.Has(filename) {
-		Error(http.StatusNotFound, "no resource with that name")
+		DoError(w, r, http.StatusNotFound, "no resource with that name")
 		return
 	}
 
@@ -41,7 +44,32 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 
 // GET /files/{fileid}
 func GetFile(w http.ResponseWriter, r *http.Request) {
-	Error(http.StatusNotImplemented, "sorry, I'm busy")
+	fileId, ok := mux.Vars(r)["file_id"]
+	if !ok {
+		DoError(w, r, http.StatusBadRequest, "missing file_id")
+		return
+	}
+
+	LockRead()
+	defer UnlockRead()
+
+	fm, err := LoadFile(fileId)
+	if err != nil {
+		DoError(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fd, err := os.Open(fm.LocalPath)
+	if err != nil {
+		DoError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	defer fd.Close()
+
+	if _, err := io.Copy(w, fd); err != nil {
+		log.Printf(`err="%v" for fileId="%v"`, err, fileId)
+	}
 }
 
 // POST /submit
@@ -64,6 +92,10 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	GetIndex(w, r)
+}
+
+func DoError(w http.ResponseWriter, r *http.Request, status int, message string) {
+	Error(status, message).ServeHTTP(w, r)
 }
 
 // Return an error handler for status.

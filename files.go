@@ -48,11 +48,11 @@ func Files() (uploads []*File, err error) {
 			continue
 		}
 
-		path := filepath.Join(uploadsDirectory, fi.Name())
+		id := fi.Name()
 
-		upload, err := LoadFile(path)
+		upload, err := LoadFile(id)
 		if err != nil {
-			log.Printf(`err="%v" for path="%v"`, err, path)
+			log.Printf(`err="%v" for id="%v"`, err, id)
 		}
 
 		uploads = append(uploads, upload)
@@ -61,12 +61,13 @@ func Files() (uploads []*File, err error) {
 	return
 }
 
-// Load the metadata for a previously uploaded file stored in directory.
+// Load the metadata for a previously uploaded.
 //
-// You should only call this function if you are holding the global read
-// lock.
-func LoadFile(directory string) (*File, error) {
-	metaPath := filepath.Join(directory, "meta.json")
+// Only call this function if you are holding the global read lock.
+func LoadFile(id string) (*File, error) {
+	storageDir := GetConfig().UploadsDirectory
+	baseDir := filepath.Join(storageDir, id)
+	metaPath := filepath.Join(baseDir, "meta.json")
 
 	metabytes, err := ioutil.ReadFile(metaPath)
 	if err != nil {

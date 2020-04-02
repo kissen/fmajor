@@ -21,6 +21,10 @@
 	{{range .Uploads}}
 		<li>
 			<a href="/files/{{.Id}}">{{.Name}}</a> ({{.HumanSize}})
+			<form action="/delete" method="post">
+				<input type="hidden" name="id" value="{{.Id}}" />
+				<input type="submit" value="Delete" />
+			</form>
 		</li>
 	{{end}}
 	</ul>

@@ -106,6 +106,21 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+// POST /delete
+func PostDelete(w http.ResponseWriter, r *http.Request) {
+	id := r.FormValue("id")
+
+	LockWrite()
+	defer UnlockWrite()
+
+	if err := DeleteFile(id); err != nil {
+		DoError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func DoError(w http.ResponseWriter, r *http.Request, status int, message string) {
 	Error(status, message).ServeHTTP(w, r)
 }

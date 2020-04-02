@@ -106,7 +106,7 @@ func LoadFile(id string) (*File, error) {
 // as a new file in the storage directory. Returns the metadata for the
 //created file.
 //
-// Only call this function if you are holding the global read lock.
+// Only call this function if you are holding the global write lock.
 func CreateFile(src io.Reader, filename string) (*File, error) {
 	id := uuid.New().String()
 
@@ -150,4 +150,32 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 	}
 
 	return &meta, nil
+}
+
+// Delete the file with id from the file system.
+//
+// Only call this function if you are holding the global write lock.
+func DeleteFile(id string) error {
+	storageDir := GetConfig().UploadsDirectory
+	baseDir := filepath.Join(storageDir, id)
+	metaPath := filepath.Join(baseDir, "meta.json")
+	storagePath := filepath.Join(baseDir, "storage.bin")
+
+	metaErr := os.Remove(metaPath)
+	storageErr := os.Remove(storagePath)
+	rmdirErr := os.Remove(baseDir)
+
+	if metaErr != nil {
+		return metaErr
+	}
+
+	if storageErr != nil {
+		return storageErr
+	}
+
+	if rmdirErr != nil {
+		return rmdirErr
+	}
+
+	return nil
 }

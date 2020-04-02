@@ -1,0 +1,18 @@
+{{define "base"}}
+<!doctype html>
+<html>
+	<head>
+		<title>{{template "title" .}}</title>
+		<!--<link rel="icon" href="static/inbox.svg">-->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=0.7">
+		<link rel=stylesheet href="/static/fmajor.css">
+	</head>
+
+	<body>
+		{{template "body" .}}
+	</body>
+
+	Powered by <i>jmajor</i>.
+</html>
+{{end}}

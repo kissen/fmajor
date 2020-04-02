@@ -1,0 +1,15 @@
+{{template "base" .}}
+
+{{define "title"}}
+	File Sharing
+{{end}}
+
+
+{{define "body"}}
+	<h1>It works!</h1>
+
+	<form enctype="multipart/form-data" action="/submit" method="post">
+		<input type="file" name="file" />
+		<input type="submit" value="Upload" />
+	</form>
+{{end}}

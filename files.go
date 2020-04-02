@@ -39,6 +39,32 @@ type File struct {
 	LocalPath string
 }
 
+// Return whether any of the fields are set to the zero-value.
+// This usually indicates some unmarshal eror.
+func (f *File) HasZero() bool {
+	if f.Id == "" {
+		return true
+	}
+
+	if f.Name == "" {
+		return true
+	}
+
+	if f.Size == 0 {
+		return true
+	}
+
+	if f.ContentType == "" {
+		return true
+	}
+
+	if f.LocalPath == "" {
+		return true
+	}
+
+	return false
+}
+
 // Return Size as a human-readable string.
 func (f *File) HumanSize() string {
 	if f.Size < 0 {
@@ -75,9 +101,9 @@ func Files() (uploads []*File, err error) {
 		upload, err := LoadFile(id)
 		if err != nil {
 			log.Printf(`err="%v" for id="%v"`, err, id)
+		} else {
+			uploads = append(uploads, upload)
 		}
-
-		uploads = append(uploads, upload)
 	}
 
 	sort.Slice(uploads, func(i, j int) bool {
@@ -105,7 +131,7 @@ func LoadFile(id string) (*File, error) {
 		return nil, errors.Wrap(err, "corrupt metadata contents")
 	}
 
-	if meta.Id == "" || meta.Name == "" || meta.Size == 0 || meta.LocalPath == "" {
+	if meta.HasZero() {
 		return nil, fmt.Errorf(`meta data at metaPath="%v" corrupt`, metaPath)
 	}
 
@@ -157,6 +183,10 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 
 	if err := ioutil.WriteFile(metaPath, metabytes, 400); err != nil {
 		return nil, errors.Wrap(err, "error writing meta file")
+	}
+
+	if meta.HasZero() {
+		return nil, fmt.Errorf(`create corrupt meta file for id="%v" filename="%v"`, id, filename)
 	}
 
 	return &meta, nil

@@ -43,9 +43,14 @@ h2 {
     font-weight: bold;
 }
 
+code {
+    font-family: "Courier New", "monospace";
+    font-size: var(--small);
+}
+
 main {
     margin: auto;
-    max-width: 48em;
+    max-width: 42em;
     padding: 1em;
     font-size: var(--medium);
 }

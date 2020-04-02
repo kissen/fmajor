@@ -1,0 +1,14 @@
+[Unit]
+Description=fmajor File Sharing Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/fmajor
+Restart=always
+RestartSec=5
+Type=simple
+User=fmajor
+WorkingDirectory=/var/lib/fmajor
+
+[Install]
+WantedBy=multi-user.target

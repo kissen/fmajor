@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gobuffalo/packr"
 	"github.com/kissen/httpstatus"
-	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
@@ -51,25 +50,17 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseMultipartForm(config.MaxFileSize)
 
-	file, _, err := r.FormFile("file")
+	file, handler, err := r.FormFile("file")
 	if err != nil {
 		Error(http.StatusBadRequest, err.Error())
 		return
 	}
 	defer file.Close()
 
-	tempFile, err := ioutil.TempFile(config.UploadsDirectory, "upload-*.png")
+	_, err = CreateFile(file, handler.Filename)
 	if err != nil {
 		Error(http.StatusInternalServerError, err.Error())
 		return
-	}
-	defer tempFile.Close()
-
-	if bs, err := ioutil.ReadAll(file); err != nil {
-		Error(http.StatusInternalServerError, err.Error())
-		return
-	} else {
-		tempFile.Write(bs)
 	}
 
 	GetIndex(w, r)

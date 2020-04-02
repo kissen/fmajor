@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"io"
@@ -11,10 +12,16 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"time"
 )
 
 type File struct {
+	// The Id of this file. It is the randomly chosen
+	// Id picked by fmajor.
+	Id string
+
 	// The filename of the file as reported to the user.
 	Name string
 
@@ -29,6 +36,16 @@ type File struct {
 
 	// The filepath on the local machine.
 	LocalPath string
+}
+
+// Return Size as a human-redable string.
+func (f *File) HumanSize() string {
+	if f.Size < 0 {
+		// shouldn't happen, but who knows...
+		return strconv.FormatInt(f.Size, 10)
+	} else {
+		return humanize.IBytes(uint64(f.Size))
+	}
 }
 
 // Get a listing of all uploaded files.
@@ -56,6 +73,10 @@ func Files() (uploads []*File, err error) {
 
 		uploads = append(uploads, upload)
 	}
+
+	sort.Slice(uploads, func(i, j int) bool {
+		return uploads[i].UploadedOnUTC.After(uploads[j].UploadedOnUTC)
+	})
 
 	return
 }
@@ -111,7 +132,8 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 	}
 
 	meta := File{
-		Name:          id,
+		Id:            id,
+		Name:          filename,
 		Size:          nbytes,
 		UploadedOnUTC: time.Now().UTC(),
 		ContentType:   mime.TypeByExtension(path.Ext(filename)),

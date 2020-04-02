@@ -19,7 +19,7 @@ type Config struct {
 func GetConfig() Config {
 	return Config{
 		ListenAddress:    "localhost:8080",
-		UploadsDirectory: "/var/tmp",
+		UploadsDirectory: "/var/tmp/uploads",
 		MaxFileSize:      1024 * 1024 * 1024 * 128, // 128 MiB
 	}
 }

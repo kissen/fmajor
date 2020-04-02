@@ -12,7 +12,7 @@ import (
 // that error to the client. It does not use our fancy Error function
 // because that function uses Render and I would prefer to avoid infinite
 // recursion.
-func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]string) {
+func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]interface{}) {
 	box := packr.NewBox("resources")
 
 	ts, err := template.New("base").Parse(box.String("base.tmpl"))

@@ -6,10 +6,22 @@
 
 
 {{define "body"}}
-	<h1>It works!</h1>
+	<h1>fmajor</h1>
+
+	<h2>Upload</h2>
 
 	<form enctype="multipart/form-data" action="/submit" method="post">
 		<input type="file" name="file" />
 		<input type="submit" value="Upload" />
 	</form>
+
+	<h2>Download a File</h2>
+
+	<ul>
+	{{range .Uploads}}
+		<li>
+			<a href="/files/{{.Id}}">{{.Name}}</a> ({{.HumanSize}})
+		</li>
+	{{end}}
+	</ul>
 {{end}}

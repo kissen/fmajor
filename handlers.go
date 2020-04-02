@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"github.com/kissen/httpstatus"
@@ -15,8 +14,18 @@ import (
 
 // GET /
 func GetIndex(w http.ResponseWriter, r *http.Request) {
-	vs := map[string]string{
-		"Title": "FMajor File Hosting",
+	LockRead()
+	defer UnlockRead()
+
+	fs, err := Files()
+	if err != nil {
+		DoError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	vs := map[string]interface{}{
+		"Title":   "FMajor File Hosting",
+		"Uploads": fs,
 	}
 
 	Render(w, r, "index.tmpl", vs)
@@ -106,8 +115,8 @@ func Error(status int, message string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf(`encountered error with message="%v" status="%v" for URL="%v"`, message, status, r.URL)
 
-		vs := map[string]string{
-			"Status":      fmt.Sprintf("%d", status),
+		vs := map[string]interface{}{
+			"Status":      status,
 			"StatusText":  http.StatusText(status),
 			"Description": httpstatus.Describe(status),
 			"Cause":       message,

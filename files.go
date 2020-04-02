@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"encoding/json"
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
@@ -102,6 +103,10 @@ func LoadFile(id string) (*File, error) {
 	var meta File
 	if err := json.Unmarshal(metabytes, &meta); err != nil {
 		return nil, errors.Wrap(err, "corrupt metadata contents")
+	}
+
+	if meta.Id == "" || meta.Name == "" || meta.Size == 0 || meta.LocalPath == "" {
+		return nil, fmt.Errorf(`meta data at metaPath="%v" corrupt`, metaPath)
 	}
 
 	return &meta, nil

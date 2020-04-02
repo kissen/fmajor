@@ -85,13 +85,16 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	LockWrite()
+	defer UnlockWrite()
+
 	_, err = CreateFile(file, handler.Filename)
 	if err != nil {
 		Error(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	GetIndex(w, r)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func DoError(w http.ResponseWriter, r *http.Request, status int, message string) {

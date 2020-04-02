@@ -32,11 +32,10 @@ type File struct {
 }
 
 // Get a listing of all uploaded files.
+//
+// Only call this function if you are holding the global read lock.
 func Files() (uploads []*File, err error) {
 	uploadsDirectory := GetConfig().UploadsDirectory
-
-	LockRead()
-	defer UnlockRead()
 
 	fis, err := ioutil.ReadDir(uploadsDirectory)
 	if err != nil {
@@ -83,9 +82,10 @@ func LoadFile(id string) (*File, error) {
 }
 
 // Given a reader that contains bytes for a file, store those contents
-// as a new file in the storage directory.
+// as a new file in the storage directory. Returns the metadata for the
+//created file.
 //
-// Returns the metadata for the created file.
+// Only call this function if you are holding the global read lock.
 func CreateFile(src io.Reader, filename string) (*File, error) {
 	id := uuid.New().String()
 
@@ -93,9 +93,6 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 	baseDir := filepath.Join(storageDir, id)
 	metaPath := filepath.Join(baseDir, "meta.json")
 	storagePath := filepath.Join(baseDir, "storage.bin")
-
-	LockWrite()
-	defer UnlockWrite()
 
 	if err := os.Mkdir(baseDir, 0700); err != nil {
 		return nil, errors.Wrap(err, "error creating directory")

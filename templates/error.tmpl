@@ -5,11 +5,13 @@
 {{end}}
 
 {{define "main"}}
-	<h2>Error {{.Status}}: {{.StatusText}}</h2>
+	<div class="error">
+		<h2>Error {{.Status}}: {{.StatusText}}</h2>
 
-	<p>{{.Description}}</p>
+		<p>{{.Description}}</p>
 
-	{{if .Cause}}
-		<p><code>{{.Cause}}</code></p>
-	{{end}}
+		{{if .Cause}}
+			<p><code>{{.Cause}}</code></p>
+		{{end}}
+	</div>
 {{end}}

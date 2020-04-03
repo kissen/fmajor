@@ -41,11 +41,13 @@ h1 {
 h2 {
     font-size: var(--large);
     font-weight: bold;
+    padding-bottom: var(--small);
 }
 
 code {
     font-family: "Courier New", "monospace";
     font-size: var(--small);
+    padding: var(--small);
 }
 
 main {
@@ -53,6 +55,12 @@ main {
     max-width: 42em;
     padding: 1em;
     font-size: var(--medium);
+}
+
+.error {
+    margin: auto;
+    max-width: 32em;
+    text-align: center;
 }
 
 .box {

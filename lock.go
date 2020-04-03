@@ -11,26 +11,42 @@ import "sync"
 // each other.
 var global sync.RWMutex
 
-// Lock the global lock for reading.
-func LockRead() {
+// Returned by LockRead and LockWrite, call the Unlock
+// method of the Unlocker to release the aquired resource.
+//
+// You can call the Unlock method as much as you want,
+// the underlying lock will only be locked exactly once.
+// In particular, it is safe to defer the Unlock but
+// also manually call Unlock in a branch.
+type Unlocker struct {
+	once       sync.Once
+	unlockfunc func()
+}
+
+func (u *Unlocker) Unlock() {
+	u.once.Do(u.unlockfunc)
+}
+
+// Lock the global lock for reading. Returns an Unlocker
+// you should use for unlocking once you are done.
+func LockRead() *Unlocker {
 	global.RLock()
+
+	return &Unlocker{
+		unlockfunc: func() {
+			global.RUnlock()
+		},
+	}
 }
 
-// Unlock the global lock for reading. Only
-// call this function exactly once after calling
-// LockRead.
-func UnlockRead() {
-	global.RUnlock()
-}
-
-// Lock the global lock for writing.
-func LockWrite() {
+// Lock the global lock for writing. Returns an Unlocker
+// you should use for unlocking once you are done.
+func LockWrite() *Unlocker {
 	global.Lock()
-}
 
-// Unlock the global lock for writing. Only
-// call this function exactly once after calling
-// LockWrite.
-func UnlockWrite() {
-	global.Unlock()
+	return &Unlocker{
+		unlockfunc: func() {
+			global.Unlock()
+		},
+	}
 }

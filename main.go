@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"time"
 )
 
 func main() {
@@ -25,8 +24,8 @@ func main() {
 	log.Printf(`listening on add="%v"`, addr)
 
 	server := http.Server{
-		Addr:         addr,
-		Handler:      router,
+		Addr:    addr,
+		Handler: router,
 	}
 
 	if err := server.ListenAndServe(); err != nil {

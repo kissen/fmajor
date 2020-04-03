@@ -15,14 +15,16 @@ import (
 
 // GET /
 func GetIndex(w http.ResponseWriter, r *http.Request) {
-	LockRead()
-	defer UnlockRead()
+	lease := LockRead()
+	defer lease.Unlock()
 
 	fs, err := Files()
 	if err != nil {
 		DoError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	lease.Unlock()
 
 	vs := map[string]interface{}{
 		"Title":   "FMajor File Hosting",
@@ -68,8 +70,8 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 	ext := path.Ext(fileId)
 	fileId = strings.TrimSuffix(fileId, ext)
 
-	LockRead()
-	defer UnlockRead()
+	lease := LockRead()
+	defer lease.Unlock()
 
 	fm, err := LoadFile(fileId)
 	if err != nil {
@@ -84,6 +86,7 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer fd.Close()
+	lease.Unlock()
 
 	if _, err := io.Copy(w, fd); err != nil {
 		log.Printf(`err="%v" for fileId="%v"`, err, fileId)
@@ -103,8 +106,8 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	LockWrite()
-	defer UnlockWrite()
+	lease := LockWrite()
+	defer lease.Unlock()
 
 	_, err = CreateFile(file, handler.Filename)
 	if err != nil {
@@ -119,8 +122,8 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 func PostDelete(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
-	LockWrite()
-	defer UnlockWrite()
+	lease := LockWrite()
+	defer lease.Unlock()
 
 	if err := DeleteFile(id); err != nil {
 		DoError(w, r, http.StatusInternalServerError, err.Error())

@@ -181,6 +181,10 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 		LocalPath:     storagePath,
 	}
 
+	if meta.ContentType == "" {
+		meta.ContentType = "application/octet-stream"
+	}
+
 	metabytes, err := json.Marshal(&meta)
 	if err != nil {
 		return nil, errors.Wrap(err, "error marhaling meta data")

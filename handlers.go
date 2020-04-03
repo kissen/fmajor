@@ -98,7 +98,7 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		Error(http.StatusBadRequest, err.Error())
+		DoError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer file.Close()
@@ -108,7 +108,7 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 
 	_, err = CreateFile(file, handler.Filename)
 	if err != nil {
-		Error(http.StatusInternalServerError, err.Error())
+		DoError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 

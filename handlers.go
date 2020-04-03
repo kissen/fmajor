@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 )
 
@@ -86,6 +87,12 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 
 	defer fd.Close()
 	lease.Unlock()
+
+	contentType := fm.ContentType
+	w.Header().Set("Content-Type", contentType)
+
+	contentLength := strconv.FormatInt(fm.Size, 10)
+	w.Header().Set("Content-Length", contentLength)
 
 	if _, err := io.Copy(w, fd); err != nil {
 		log.Printf(`err="%v" for fileId="%v"`, err, fileId)

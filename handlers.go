@@ -27,7 +27,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	lease.Unlock()
 
 	vs := map[string]interface{}{
-		"Title":   "FMajor File Hosting",
 		"Uploads": fs,
 	}
 

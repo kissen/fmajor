@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 )
 
 // GET /
@@ -47,7 +46,6 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 	mimetype := mime.TypeByExtension(path.Ext(filename))
 
 	w.Header().Add("Content-Type", mimetype)
-	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write(box.Bytes(filename)); err != nil {
 		log.Printf(`serving static filename="%v" failed with err="%v"`, filename, err)
@@ -67,15 +65,23 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ext := path.Ext(fileId)
-	fileId = strings.TrimSuffix(fileId, ext)
+	fileName, ok := mux.Vars(r)["file_name"]
+	if !ok {
+		DoError(w, r, http.StatusBadRequest, "missing file_name")
+		return
+	}
 
 	lease := LockRead()
 	defer lease.Unlock()
 
 	fm, err := LoadFile(fileId)
 	if err != nil {
-		DoError(w, r, http.StatusBadRequest, err.Error())
+		DoError(w, r, http.StatusNotFound, err.Error())
+		return
+	}
+
+	if fileName != fm.Name {
+		DoError(w, r, http.StatusNotFound, "")
 		return
 	}
 

@@ -80,11 +80,6 @@ func (f *File) HumanUploadedOn() string {
 	return f.UploadedOnUTC.Format("2006/01/02 15:04")
 }
 
-// The extension of the original filename.
-func (f *File) Ext() string {
-	return path.Ext(f.Name)
-}
-
 // Get a listing of all uploaded files.
 //
 // Only call this function if you are holding the global read lock.

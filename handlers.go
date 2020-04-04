@@ -109,7 +109,8 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 func PostSubmit(w http.ResponseWriter, r *http.Request) {
 	config := GetConfig()
 
-	r.ParseMultipartForm(config.MaxFileSize)
+	r.Body = http.MaxBytesReader(w, r.Body, config.MaxFileSize)
+	r.ParseMultipartForm(16 * 1024 * 1024)  // 16 MiB buffer
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {

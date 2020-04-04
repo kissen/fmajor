@@ -40,7 +40,7 @@ License, or (at your option) any later version. For a copy of this
 license, see `LICENSE`.
 
 Above applies only to the source code. Excluded are included icons
-icons from the [Feather](https://feathericons.com/) icon set licensed
+from the [Feather](https://feathericons.com/) icon set licensed
 under the following terms.
 
 	The MIT License (MIT)

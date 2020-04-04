@@ -1,7 +1,7 @@
 # fmajor
 
-`fmajor` is a self-hosted file upload service. It is very basic, but
-easy to install.
+`fmajor` is a self-hosted file upload service. It is basic, but easy
+to install.
 
 ![Screenshot of fmajor running in Firefox](doc/screenshot.png)
 
@@ -10,24 +10,87 @@ easy to install.
 * Upload, download and delete files all from the web interface.
 
 * `fmajor` is compiled to one static binary, which includes all
-  resources. This makes deployment very easy, no need for containers
+  resources. This makes deployment easy, no need for containers
   or virtual machines.
 
 * Doesn't require a database. All data is stored on the file system.
 
 ## What it Doesn't Do
 
-* Authentication and Authorization; there isn't any. You'll have
-  to use a proxy like `nginx` with basic authentication if you don't
-  want random people on the internet uploading files on your server.
+* Authentication and Authorization. You'll have to use a proxy like
+  `nginx` with basic authentication if you don't want random people on
+  the internet uploading files to your server.
 
 ## Install
 
-The following instructions were tested on Debian 10, but installation
-on any `systemd` based system should be about the same. If you aren't
-using `systemd`, you probably know what to do differently.
+The following instructions were tested on Debian 10 and assume that
+you know how to proxy and secure HTTP services with something like
+`nginx`.
 
-(TODO)
+1. Make sure all prerequisites are installed. You will need `git` and
+   `go` version 1.13 or later.
+
+2. Download, build and install the `fmajor` program.
+
+		$ go get github.com/kissen/fmajor
+		$ go build github.com/kissen/fmajor
+
+   You should now have an `fmajor` binary in your working directory.
+   Copy it to a reasonable location on the file system.
+
+		# cp fmajor /usr/bin/fmajor
+
+3. Create a dedicated user for running `fmajor`.
+
+		# adduser --home /var/lib/fmajor --shell /sbin/nologin --disabled-password fmajor
+
+   This creates a user named `fmajor` with home directory `/var/lib/fmajor`
+   which is where we will let `fmajor` put all its uploads.
+
+4. Copy the configuration file to `/etc`.
+
+		# wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.conf
+		# mv fmajor.conf /etc/fmajor.conf
+
+   You should now have a configuration file `/etc/fmajor.conf`. Open
+   it with a text editor and edit it to your liking.
+
+5. Install the `systemd` service file.
+
+		# wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.service
+		# mv fmajor.service /lib/systemd/system/fmajor.service
+		# systemctl daemon-reload
+
+6. You can now start the `fmajor` service with
+
+		# systemctl start fmajor
+
+   which will make `systemd` take care of keeping your logs. Access
+   the logs using
+
+		# journalctl -u fmajor.service
+
+   If you want `fmajor` to start during boot, enable the service with
+   `systemctl` like so
+
+		# systemctl enable fmajor
+
+
+7. `fmajor` listens to the `ListenAddress` defined in configuration
+   file `/etc/fmajor.conf`. Per default, this is `localhost` which of
+   course isn't very useful if you want to access the service
+   remotely. To make `fmajor` accessible on the open internet,
+   configure your reverse proxy (e.g. `nginx`) to forward requests to
+   `ListenAddress`.
+
+   Because `fmajor` doesn't have any access control built in, you should
+   have your proxy take care of it. [HTTP Basic Auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
+   is the easiest way.
+
+   You should also configure your reverse proxy to use HTTPS, otherwise
+   third parties will be able to listen on what you are uploading
+   and downloading. [Let's Encrypt](https://letsencrypt.org/) with
+   [Certbot](https://certbot.eff.org/) is the canonical choice.
 
 ## Credit
 
@@ -40,7 +103,7 @@ License, or (at your option) any later version. For a copy of this
 license, see `LICENSE`.
 
 Above applies only to the source code. Excluded are included icons
-icons from the [Feather](https://feathericons.com/) icon set licensed
+from the [Feather](https://feathericons.com/) icon set licensed
 under the following terms.
 
 	The MIT License (MIT)

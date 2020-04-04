@@ -1,13 +1,47 @@
-fmajor
-======
+# fmajor
 
 `fmajor` is a self-hosted file upload service. It is very basic, but
 easy to install.
 
+![Screenshot of fmajor running in Firefox](doc/screenshot.png)
+
+## Features
+
+* Upload, download and delete files all from the web interface.
+
+* `fmajor` is compiled to one static binary, which includes all
+  resources. This makes deployment very easy, no need for containers
+  or virtual machines.
+
+* Doesn't require a database. All data is stored on the file system.
+
+## What it Doesn't Do
+
+* Authentication and Authorization; there isn't any. You'll have
+  to use a proxy like `nginx` with basic authentication if you don't
+  want random people on the internet uploading files on your server.
+
+## Install
+
+The following instructions were tested on Debian 10, but installation
+on any `systemd` based system should be about the same. If you aren't
+using `systemd`, you probably know what to do differently.
+
+(TODO)
+
 ## Credit
 
-This code contains icons from the [Feather](https://feathericons.com/) icon set
-licensed under the following terms.
+(c) 2020 Andreas Schärtl
+
+This program (fmajor) is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version. For a copy of this
+license, see `LICENSE`.
+
+Above applies only to the source code. Excluded are included icons
+icons from the [Feather](https://feathericons.com/) icon set licensed
+under the following terms.
 
 	The MIT License (MIT)
 

@@ -50,7 +50,7 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write(box.Bytes(filename)); err != nil {
-		log.Printf(`writing static filename="%v" failed with err="%v"`, filename, err)
+		log.Printf(`serving static filename="%v" failed with err="%v"`, filename, err)
 	}
 }
 
@@ -95,7 +95,7 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", contentLength)
 
 	if _, err := io.Copy(w, fd); err != nil {
-		log.Printf(`err="%v" for fileId="%v"`, err, fileId)
+		log.Printf(`serving fileId="%v" failed with err="%v"`, fileId, err)
 	}
 }
 
@@ -146,8 +146,6 @@ func DoError(w http.ResponseWriter, r *http.Request, status int, message string)
 // Return an error handler for status.
 func Error(status int, message string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf(`encountered error with message="%v" status="%v" for URL="%v"`, message, status, r.URL)
-
 		vs := map[string]interface{}{
 			"Status":      status,
 			"StatusText":  http.StatusText(status),

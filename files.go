@@ -103,9 +103,8 @@ func Files() (uploads []*File, err error) {
 
 		id := fi.Name()
 
-		upload, err := LoadFile(id)
-		if err != nil {
-			log.Printf(`err="%v" for id="%v"`, err, id)
+		if upload, err := LoadFile(id); err != nil {
+			log.Printf("problem while creating file listing: %v", err)
 		} else {
 			uploads = append(uploads, upload)
 		}
@@ -128,16 +127,16 @@ func LoadFile(id string) (*File, error) {
 
 	metabytes, err := ioutil.ReadFile(metaPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "corrupt metadata file")
+		return nil, errors.Wrapf(err, `cannot open meta.json for id="%v"`, id)
 	}
 
 	var meta File
 	if err := json.Unmarshal(metabytes, &meta); err != nil {
-		return nil, errors.Wrap(err, "corrupt metadata contents")
+		return nil, errors.Wrapf(err, `cannot parse meta.json for id="%v"`, id)
 	}
 
 	if meta.HasZero() {
-		return nil, fmt.Errorf(`meta data at metaPath="%v" corrupt`, metaPath)
+		return nil, fmt.Errorf(`meta.json for id="%v" contains invalid values`, id)
 	}
 
 	return &meta, nil
@@ -157,19 +156,21 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 	storagePath := filepath.Join(baseDir, "storage.bin")
 
 	if err := os.Mkdir(baseDir, 0700); err != nil {
-		return nil, errors.Wrap(err, "error creating directory")
+		return nil, errors.Wrapf(err, `cannot create directory for filename="%v"`, filename)
 	}
 
 	fd, err := os.Create(storagePath)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating storage file")
+		DeleteFileAsync(id)
+		return nil, errors.Wrapf(err, `cannot create storage.bin for id="%v" filename="%v"`, id, filename)
 	}
 
 	defer fd.Close()
 
 	nbytes, err := io.Copy(fd, src)
 	if err != nil {
-		return nil, errors.Wrap(err, "error writing storage file")
+		DeleteFileAsync(id)
+		return nil, errors.Wrapf(err, `cannot write storage.bin for id="%v" filename="%v"`, id, filename)
 	}
 
 	meta := File{
@@ -187,15 +188,18 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 
 	metabytes, err := json.Marshal(&meta)
 	if err != nil {
-		return nil, errors.Wrap(err, "error marhaling meta data")
+		DeleteFileAsync(id)
+		return nil, errors.Wrapf(err, `cannot construct meta.json for id="%v" filename="%v"`, id, filename)
 	}
 
 	if err := ioutil.WriteFile(metaPath, metabytes, 400); err != nil {
-		return nil, errors.Wrap(err, "error writing meta file")
+		DeleteFileAsync(id)
+		return nil, errors.Wrapf(err, `cannot write meta.json for id="%v" filename="%v"`, id, filename)
 	}
 
 	if meta.HasZero() {
-		return nil, fmt.Errorf(`create corrupt meta file for id="%v" filename="%v"`, id, filename)
+		DeleteFileAsync(id)
+		return nil, fmt.Errorf(`meta.json for id="%v" filename="%v" contains invalid values`, id, filename)
 	}
 
 	return &meta, nil
@@ -227,4 +231,39 @@ func DeleteFile(id string) error {
 	}
 
 	return nil
+}
+
+// Acquire the write lock and try our best to delete the directory
+// for the file with given id.
+//
+// This function is handy when you (probably) created a broken
+// file upload and want to clean up everything it left behind.
+// In those cases, call DeleteFileAsync and whatever the upload
+// left behind will be deleted when convenient.
+//
+// This function does not return an error, rather it writes a
+// log message when it cannot delete the directory for gven id.
+func DeleteFileAsync(id string) {
+	go func() {
+		lease := LockWrite()
+		defer lease.Unlock()
+
+		// the following logic is similar to DeleteFile; unlike
+		// DeleteFile, we don't care if the file directory is
+		// corrupt in some way or missing files, all we care is
+		// that we get rid of it
+
+		storageDir := GetConfig().UploadsDirectory
+		baseDir := filepath.Join(storageDir, id)
+		metaPath := filepath.Join(baseDir, "meta.json")
+		storagePath := filepath.Join(baseDir, "storage.bin")
+
+		os.Remove(metaPath)
+		os.Remove(storagePath)
+		err := os.Remove(baseDir)
+
+		if err != nil {
+			log.Printf(`could not clean up id="%v"`, id)
+		}
+	}()
 }

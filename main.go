@@ -21,7 +21,7 @@ func main() {
 	router.MethodNotAllowedHandler = Error(http.StatusMethodNotAllowed, "")
 
 	addr := GetConfig().ListenAddress
-	log.Printf(`listening on add="%v"`, addr)
+	log.Printf(`listening on addr="%v"`, addr)
 
 	server := http.Server{
 		Addr:    addr,

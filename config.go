@@ -13,7 +13,7 @@ import (
 
 // Configuration of a fmajor instance.
 type Config struct {
-	// The address to listen for HTTP connections. Probably
+	// The address to listen on for HTTP connections. Probably
 	// something like "localhost:9090".
 	ListenAddress string
 
@@ -27,14 +27,19 @@ type Config struct {
 	MaxFileSize int64
 }
 
+// Global instance of the configuration. Use GetConfig to access
+// this variable.
 var config *Config
 var configCreator sync.Once
 
+// Return the singleton instance of the config.
 func GetConfig() *Config {
 	configCreator.Do(loadConfig)
 	return config
 }
 
+// Populate the "config" global variable. If it fails, we can't continue,
+// in that case we stop the program.
 func loadConfig() {
 	// try to find a config file that works; if it fails we don't
 	// report an error right away as a later file might be available
@@ -58,16 +63,18 @@ func loadConfig() {
 			log.Println(err)
 		}
 
-		log.Fatal("missing configuration file")
+		log.Fatal("missing configuration file, maybe supply one with the -c flag")
 	}
 }
 
+// Return a collection of filepaths where we may find a configuration
+// file to parse.
 func configPaths() []string {
 	// first check whether the user supplied the -c flag; if they did,
 	// only consider that file
 
 	var custom string
-	flag.StringVar(&custom, "c", "/dev/null", "the configuration file to load, maybe supply one with the -c flag")
+	flag.StringVar(&custom, "c", "/dev/null", "path to configuration file")
 	flag.Parse()
 	if custom != "/dev/null" {
 		return []string{
@@ -92,6 +99,7 @@ func configPaths() []string {
 	return paths
 }
 
+// Try to open and parse configuration file at filename.
 func loadConfigFrom(filename string) (*Config, error) {
 	var c Config
 

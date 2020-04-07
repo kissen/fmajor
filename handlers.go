@@ -33,7 +33,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	Render(w, r, "index.tmpl", vs)
 }
 
-// GET /static/{resourceid}
+// GET /static/{resource_id}
 func GetStatic(w http.ResponseWriter, r *http.Request) {
 	box := packr.NewBox("static")
 	filename := path.Base(r.URL.Path)
@@ -57,7 +57,7 @@ func GetFavicon(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/static/paperclip.svg", http.StatusPermanentRedirect)
 }
 
-// GET /files/{fileid}
+// GET /files/{file_id}/{file_name}
 func GetFile(w http.ResponseWriter, r *http.Request) {
 	fileId, ok := mux.Vars(r)["file_id"]
 	if !ok {

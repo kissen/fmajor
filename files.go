@@ -39,7 +39,7 @@ type File struct {
 	LocalPath string
 }
 
-// Return whether any of the fields are set to the zero-value.
+// Return whether any of the fields are set to their zero-value.
 // This usually indicates some unmarshal eror.
 func (f *File) HasZero() bool {
 	if f.Id == "" {
@@ -112,7 +112,7 @@ func Files() (uploads []*File, err error) {
 	return
 }
 
-// Load the metadata for a previously uploaded.
+// Load the metadata for a previously uploaded file.
 //
 // Only call this function if you are holding the global read lock.
 func LoadFile(id string) (*File, error) {
@@ -139,7 +139,7 @@ func LoadFile(id string) (*File, error) {
 
 // Given a reader that contains bytes for a file, store those contents
 // as a new file in the storage directory. Returns the metadata for the
-//created file.
+// created file.
 //
 // Only call this function if you are holding the global write lock.
 func CreateFile(src io.Reader, filename string) (*File, error) {
@@ -228,8 +228,8 @@ func DeleteFile(id string) error {
 	return nil
 }
 
-// Acquire the write lock and try our best to delete the directory
-// for the file with given id.
+// In a new goroutine, acquire the write lock and try our best to
+// delete the directory for the file with given id.
 //
 // This function is handy when you (probably) created a broken
 // file upload and want to clean up everything it left behind.
@@ -237,7 +237,7 @@ func DeleteFile(id string) error {
 // left behind will be deleted when convenient.
 //
 // This function does not return an error, rather it writes a
-// log message when it cannot delete the directory for gven id.
+// log message when it cannot delete the directory for given id.
 func DeleteFileAsync(id string) {
 	go func() {
 		lease := LockWrite()

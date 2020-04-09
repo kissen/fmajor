@@ -1,0 +1,25 @@
+{{template "base" .}}
+
+{{define "title"}}
+	File Hosting Service: Log In
+{{end}}
+
+
+{{define "main"}}
+	<div class="box">
+		<form class="login_form" action="/login" method="post">
+			<input type="password" name="passphrase" placeholder="Passphrase" />
+			<input type="submit" value="Log In" />
+		</form>
+	</div>
+
+	<div class="boxinfo">
+		<p>
+			Uploading, deleting and listing of files requires you
+			to log in with a passphrase. No username is required.
+			If you are the administrator of this instance, take a
+			look at the <em>PassHashes</em> configuration in
+			<em>fmajor.conf</em> to set up passphrases.
+		</p>
+	</div>
+{{end}}

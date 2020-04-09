@@ -15,6 +15,11 @@ import (
 
 // GET /
 func GetIndex(w http.ResponseWriter, r *http.Request) {
+	if ok, _ := IsAuthorized(r); !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
 	lease := LockRead()
 	defer lease.Unlock()
 
@@ -31,6 +36,36 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Render(w, r, "index.tmpl", vs)
+}
+
+// GET /login
+func GetLogin(w http.ResponseWriter, r *http.Request) {
+	if ok, _ := IsAuthorized(r); ok {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	Render(w, r, "login.tmpl", nil)
+}
+
+// POST /login
+func PostLogin(w http.ResponseWriter, r *http.Request) {
+	passphrase := r.FormValue("passphrase")
+	if passphrase == "" {
+		DoError(w, r, http.StatusBadRequest, "missing passphrase")
+		return
+	}
+
+	if !IsValidPassphrase(passphrase) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if err := SetAuthorized(w); err != nil {
+		log.Println(err)
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // GET /static/{resource_id}
@@ -107,6 +142,11 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 
 // POST /submit
 func PostSubmit(w http.ResponseWriter, r *http.Request) {
+	if ok, _ := IsAuthorized(r); !ok {
+		DoError(w, r, http.StatusUnauthorized, "/submit requires log in")
+		return
+	}
+
 	config := GetConfig()
 
 	r.Body = http.MaxBytesReader(w, r.Body, config.MaxFileSize)
@@ -133,6 +173,11 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 
 // POST /delete
 func PostDelete(w http.ResponseWriter, r *http.Request) {
+	if ok, _ := IsAuthorized(r); !ok {
+		DoError(w, r, http.StatusUnauthorized, "/delete requires log in")
+		return
+	}
+
 	id := r.FormValue("id")
 
 	lease := LockWrite()

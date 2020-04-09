@@ -1,3 +1,4 @@
+
 :root {
     --accent-ink: white;
     --accent: #083d77;
@@ -14,10 +15,7 @@
     margin: 0;
 }
 
-body {
-    padding: 0;
-    margin: 0;
-}
+/* header; includes the title of the page */
 
 header {
     background-color: var(--accent);
@@ -32,6 +30,8 @@ header a {
     text-decoration: none;
 }
 
+/* headings */
+
 h1 {
     font-size: var(--large);
     margin: 0;
@@ -44,18 +44,18 @@ h2 {
     padding-bottom: var(--small);
 }
 
-code {
-    font-family: "Courier New", "monospace";
-    font-size: var(--small);
-    padding: var(--small);
-}
+/* main contains the actual content */
 
 main {
+    font-size: var(--medium);
     margin: auto;
     max-width: 42em;
     padding: 1em;
-    font-size: var(--medium);
 }
+
+/* class "error" contains the error message; it's a bit
+ * less wide than the normal content because otherwise the
+ * text is too stretched */
 
 .error {
     margin: auto;
@@ -63,35 +63,84 @@ main {
     text-align: center;
 }
 
+/* individual files and some forms are embedded in a filled
+ * out box */
+
 .box {
-    padding: 1em;
     background-color: var(--accent);
     color: var(--accent-ink);
     margin: 1em;
+    padding: 1em;
 }
 
 .box a {
     color: var(--accent-ink);
 }
 
-input[type="file"] {
+/* the login form */
+
+.login_form {
     font-size: var(--medium);
+    margin: auto;
+    padding: 1em;
 }
 
-input[type="submit"] {
+.login_form input {
+    box-sizing: border-box;
     font-size: var(--medium);
-    float: right;
+    width: 100%;
 }
+
+.login_form input[type="password"] {
+    margin-bottom: 1em;
+    padding: var(--small);
+}
+
+.boxinfo {
+    font-size: var(--small);
+    margin-left: var(--medium);
+    margin-right: var(--medium);
+    padding-left: var(--medium);
+    padding-right: var(--medium);
+}
+
+/* the upload form */
+
+.upload_form {
+    display: flex;
+    justify-content: space-between;
+}
+
+.upload_form input[type="file"] {
+    font-size: var(--medium);
+    width: 100%;
+}
+
+/* meta information of a single file which contains
+ * upload date and file size */
 
 .meta {
     font-size: var(--small);
 }
 
-.delete_button {
+/* our fancy image buttons */
+
+input[type="image"] {
     float: right;
+    height: var(--large);
+    padding: 4pt;
+    width: var(--large);
 }
+
+input[type="image"]:hover {
+    background-color: var(--ink);
+    color: var(--accent);
+}
+
+/* footer for advertsing >:D */
 
 footer {
     font-size: var(--small);
+    padding-bottom: var(--medium);
     text-align: center;
 }

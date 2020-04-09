@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
 	"io/ioutil"
@@ -23,8 +24,21 @@ type Config struct {
 	// on this directory.
 	UploadsDirectory string
 
-	// Maximum file size in bytes.
+	// Maximum file size in bytes. Stored as signed integer
+	// because the http API where we use MaxFileSize requires
+	// a signed integer.
 	MaxFileSize int64
+
+	// Set of SHA256 encoded password hashes stored as
+	// hex strings. Upper and lower case characters
+	// can be mixed.
+	//
+	// For example, you can create these hashes by running
+	//
+	//   echo -n seekritpassword | sha256sum
+	//
+	// and copying the hex result.
+	PassHashes []string
 }
 
 // Global instance of the configuration. Use GetConfig to access
@@ -36,6 +50,28 @@ var configCreator sync.Once
 func GetConfig() *Config {
 	configCreator.Do(loadConfig)
 	return config
+}
+
+// Return any errors in the configuration if we can find them.
+// This is only a basic test for empty strings and the like.
+func (c *Config) Error() error {
+	if c.ListenAddress == "" {
+		return errors.New("empty ListenAddress")
+	}
+
+	if c.UploadsDirectory == "" {
+		return errors.New("empty UploadsDirecotry")
+	}
+
+	if c.MaxFileSize <= 0 {
+		return fmt.Errorf("bad MaxFileSize=%v", c.MaxFileSize)
+	}
+
+	if c.PassHashes == nil {
+		return errors.New("empty PassHashes")
+	}
+
+	return nil
 }
 
 // Populate the "config" global variable. If it fails, we can't continue,
@@ -109,6 +145,10 @@ func loadConfigFrom(filename string) (*Config, error) {
 	}
 
 	if err := toml.Unmarshal(bs, &c); err != nil {
+		return nil, errors.Wrapf(err, `filename="%v" not a valid config file`, filename)
+	}
+
+	if err := c.Error(); err != nil {
 		return nil, errors.Wrapf(err, `filename="%v" not a valid config file`, filename)
 	}
 

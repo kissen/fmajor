@@ -130,4 +130,4 @@ under the following terms.
 
 The affected files are
 
-	/static/trash-2.svg /static/paperclip.svg
+	/static/trash-2.svg /static/paperclip.svg /static/upload-cloud.svg

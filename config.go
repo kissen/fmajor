@@ -67,7 +67,7 @@ func (c *Config) Error() error {
 		return fmt.Errorf("bad MaxFileSize=%v", c.MaxFileSize)
 	}
 
-	if c.PassHashes == nil {
+	if len(c.PassHashes) == 0 {
 		return errors.New("empty PassHashes")
 	}
 

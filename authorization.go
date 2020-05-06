@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"github.com/gorilla/securecookie"
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"time"
@@ -106,33 +104,17 @@ func SetUnauthorized(w http.ResponseWriter) error {
 // Return whether pass is a valid Passphrase defined in the configuration
 // file.
 func IsValidPassphrase(pass string) bool {
-	ps := shasum(pass)
+	pb := []byte(pass)
 
 	for _, hs := range GetConfig().PassHashes {
-		hb, err := hex.DecodeString(hs)
-		if err != nil {
-			log.Printf(`bad PassHashes entry="%v" in configuration file`, hs)
-			continue
-		}
+		hb := []byte(hs)
 
-		if eq(ps, hb) {
+		if err := bcrypt.CompareHashAndPassword(hb, pb); err == nil {
 			return true
 		}
 	}
 
 	return false
-}
-
-// Return the SHA256 sum of s.
-func shasum(s string) []byte {
-	h := sha256.New()
-	h.Write([]byte(s))
-	return h.Sum(nil)
-}
-
-// Return whether s and t are equal.
-func eq(s, t []byte) bool {
-	return bytes.Compare(s, t) == 0
 }
 
 func setCookie(w http.ResponseWriter, ac *AuthorizedCookie) error {

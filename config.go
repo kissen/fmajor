@@ -29,15 +29,15 @@ type Config struct {
 	// a signed integer.
 	MaxFileSize int64
 
-	// Set of SHA256 encoded password hashes stored as
-	// hex strings. Upper and lower case characters
-	// can be mixed.
+	// Set of bcrypt password hashes. For example, you can create
+	// these hashes by running:
 	//
-	// For example, you can create these hashes by running
+	//   htpasswd -n -B -C 12 "" | tr -d ':\n'
 	//
-	//   echo -n seekritpassword | sha256sum
+	// The generated hash should look something like this:
 	//
-	// and copying the hex result.
+	//   $2y$12$BkkH3A/W67qKQ7vwCxwcPOf4XllhwNWxTV5Pl4Zb1aLd1bd4Ga5m2
+	//
 	PassHashes []string
 }
 

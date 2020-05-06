@@ -7,19 +7,21 @@ to install.
 
 ## Features
 
-* Upload, download and delete files all from the web interface.
+* Upload, download and delete files all from the web interface.  Only
+  users with a passphrase can upload and delete file but *everyone can
+  download all uploaded files assuming they have the link*.
 
 * `fmajor` is compiled to one static binary, which includes all
-  resources. This makes deployment easy, no need for containers
-  or virtual machines.
+  resources. This makes deployment easy, no need for containers or
+  virtual machines.
 
 * Doesn't require a database. All data is stored on the file system.
 
 ## What it Doesn't Do
 
-* Authentication and Authorization. You'll have to use a proxy like
-  `nginx` with basic authentication if you don't want random people on
-  the internet uploading files to your server.
+* `fmajor` does not include transport encryption (i.e. HTTPS). Please
+  use a proxy like `nginx` with TLS enabled to ensure that nobody
+  listens to your login passphrase.
 
 ## Install
 
@@ -52,16 +54,34 @@ you know how to proxy and secure HTTP services with something like
 		# wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.conf
 		# mv fmajor.conf /etc/fmajor.conf
 
-   You should now have a configuration file `/etc/fmajor.conf`. Open
-   it with a text editor and edit it to your liking.
+   You should now have a configuration file `/etc/fmajor.conf`.
 
-5. Install the `systemd` service file.
+5. You need to set up at least one passphrase. Without a passphrase,
+   you will not be able to log in and therefore upload files.
+
+   The easiest way is to use the `htpasswd` tool to generate the
+   hash. On Debian, you can get it in the `apache2-utils`
+   package. With it installed, run
+
+		$ htpasswd -n -B -C 12 "" | tr -d ':\n'
+
+   and you will be prompted for the passphrase. The hash is printed to
+   `stdout`.
+
+   Then open `/etc/fmajor.conf` with a text editor and edit section
+   `PassHashes` accordingly. It should look something like
+
+		PassHashes = [
+			"$2y$12$uTLL4JVVyJg9aunt.hyraej3m0yW6siY2cAQ1MakmUxtxgR4EoPbK"
+		]
+
+6. Install the `systemd` service file.
 
 		# wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.service
 		# mv fmajor.service /lib/systemd/system/fmajor.service
 		# systemctl daemon-reload
 
-6. You can now start the `fmajor` service with
+7. You can now start the `fmajor` service with
 
 		# systemctl start fmajor
 
@@ -76,20 +96,16 @@ you know how to proxy and secure HTTP services with something like
 		# systemctl enable fmajor
 
 
-7. `fmajor` listens to the `ListenAddress` defined in configuration
+8. `fmajor` listens to the `ListenAddress` defined in configuration
    file `/etc/fmajor.conf`. Per default, this is `localhost` which of
    course isn't very useful if you want to access the service
    remotely. To make `fmajor` accessible on the open internet,
    configure your reverse proxy (e.g. `nginx`) to forward requests to
    `ListenAddress`.
 
-   Because `fmajor` doesn't have any access control built in, you should
-   have your proxy take care of it. [HTTP Basic Auth](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
-   is the easiest way.
-
-   You should also configure your reverse proxy to use HTTPS, otherwise
-   third parties will be able to listen on what you are uploading
-   and downloading. [Let's Encrypt](https://letsencrypt.org/) with
+   You should configure your reverse proxy to use HTTPS, otherwise
+   third parties will be able to listen to your connection with
+   `fmajor`.  [Let's Encrypt](https://letsencrypt.org/) with
    [Certbot](https://certbot.eff.org/) is the canonical choice.
 
 ## Credit

@@ -13,6 +13,7 @@ func main() {
 	router.HandleFunc("/", GetIndex).Methods("GET")
 	router.HandleFunc("/login", GetLogin).Methods("GET")
 	router.HandleFunc("/login", PostLogin).Methods("POST")
+	router.HandleFunc("/logout", PostLogout).Methods("POST")
 	router.HandleFunc("/favicon.ico", GetFavicon).Methods("GET")
 	router.HandleFunc("/files/{file_id:.+}/{file_name:.+}", GetFile).Methods("GET")
 	router.HandleFunc("/static/{resource_id:.+}", GetStatic).Methods("GET")

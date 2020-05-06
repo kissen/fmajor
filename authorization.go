@@ -33,6 +33,24 @@ var (
 type AuthorizedCookie struct {
 	// When this cookie was created created.
 	AuthorizedOnUTC time.Time
+
+	// Whether this user is actually logged in.
+	//
+	// When a user logs in, a user with LoggedIn set to
+	// true is set. When the user logs out, a cookie with
+	// LoggedIn set to false is set instead. We do not only
+	// clear the cookie to avoid annoying error messages when
+	// parsing the cookie.
+	LoggedIn bool
+}
+
+// Return whether user with cookie c is authorized to access
+// restricted resource at this current time.
+func (ac *AuthorizedCookie) Authorized() bool {
+	loginExpiresOn := ac.AuthorizedOnUTC.Add(LOGIN_DURATION)
+	expired := time.Now().UTC().After(loginExpiresOn)
+
+	return ac.LoggedIn && !expired
 }
 
 // Initialize HashKey and BlockKey. We do not persist these keys, after
@@ -62,34 +80,27 @@ func IsAuthorized(r *http.Request) (authorized bool, err error) {
 		return false, errors.Wrap(err, "could not decode cookie")
 	}
 
-	loginExpiresOn := ac.AuthorizedOnUTC.Add(LOGIN_DURATION)
-	authorized = time.Now().UTC().Before(loginExpiresOn)
-
-	return authorized, nil
+	return ac.Authorized(), nil
 }
 
 // Set a cookie on w that indicates that this user is logged in.
 func SetAuthorized(w http.ResponseWriter) error {
 	ac := AuthorizedCookie{
 		AuthorizedOnUTC: time.Now().UTC(),
+		LoggedIn:        true,
 	}
 
-	encoder := securecookie.New(HashKey, BlockKey)
-	value, err := encoder.Encode(AUTHORIZED_COOKIE, &ac)
-	if err != nil {
-		return errors.Wrap(err, "could not encode cookie")
+	return setCookie(w, &ac)
+}
+
+// Set a cookie on w that indicates that this user is not logged in.
+func SetUnauthorized(w http.ResponseWriter) error {
+	ac := AuthorizedCookie{
+		AuthorizedOnUTC: time.Now().UTC(),
+		LoggedIn:        false,
 	}
 
-	cookie := &http.Cookie{
-		Name:     AUTHORIZED_COOKIE,
-		Value:    value,
-		Path:     "/",
-		Secure:   false,
-		HttpOnly: true,
-	}
-
-	http.SetCookie(w, cookie)
-	return nil
+	return setCookie(w, &ac)
 }
 
 // Return whether pass is a valid Passphrase defined in the configuration
@@ -122,4 +133,23 @@ func shasum(s string) []byte {
 // Return whether s and t are equal.
 func eq(s, t []byte) bool {
 	return bytes.Compare(s, t) == 0
+}
+
+func setCookie(w http.ResponseWriter, ac *AuthorizedCookie) error {
+	encoder := securecookie.New(HashKey, BlockKey)
+	value, err := encoder.Encode(AUTHORIZED_COOKIE, &ac)
+	if err != nil {
+		return errors.Wrap(err, "could not encode cookie")
+	}
+
+	cookie := &http.Cookie{
+		Name:     AUTHORIZED_COOKIE,
+		Value:    value,
+		Path:     "/",
+		Secure:   false,
+		HttpOnly: true,
+	}
+
+	http.SetCookie(w, cookie)
+	return nil
 }

@@ -13,6 +13,8 @@ import (
 // because that function uses Render and I would prefer to avoid infinite
 // recursion.
 func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]interface{}) {
+	// prepare template files
+
 	box := packr.NewBox("templates")
 
 	ts, err := template.New("base").Parse(box.String("base.tmpl"))
@@ -25,6 +27,18 @@ func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]i
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// set some flags used by all templates
+
+	if vs == nil {
+		vs = make(map[string]interface{})
+	}
+
+	if authed, err := IsAuthorized(r); err == nil {
+		vs["IsAuthorized"] = authed
+	}
+
+	// render out the page to the HTTP writer
 
 	if err := ts.Execute(w, vs); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

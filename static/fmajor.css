@@ -1,7 +1,7 @@
-
 :root {
     --accent-ink: white;
     --accent: #083d77;
+    --accent-light: #487db7;
     --ink: #323031;
 
     --small: 12pt;
@@ -20,9 +20,9 @@
 header {
     background-color: var(--accent);
     color: var(--accent-ink);
-    margin: 0;
-    padding: 0;
-    text-align: center;
+    padding: var(--small);
+    white-space: nowrap;
+    width: 100%;
 }
 
 header a {
@@ -30,9 +30,16 @@ header a {
     text-decoration: none;
 }
 
+.logout_form {
+    float: right;
+    font-size: var(--medium);
+    padding-right: 2em;
+}
+
 /* headings */
 
 h1 {
+    display: inline;
     font-size: var(--large);
     margin: 0;
     padding: 0;
@@ -133,7 +140,7 @@ input[type="image"] {
 }
 
 input[type="image"]:hover {
-    background-color: var(--ink);
+    background-color: var(--accent-light);
     color: var(--accent);
 }
 

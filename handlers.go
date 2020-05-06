@@ -68,6 +68,26 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// POST /logout
+func PostLogout(w http.ResponseWriter, r *http.Request) {
+	authed, err := IsAuthorized(r)
+	if err != nil {
+		DoError(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !authed {
+		DoError(w, r, http.StatusBadRequest, "not logged in")
+		return
+	}
+
+	if err := SetUnauthorized(w); err != nil {
+		DoError(w, r, http.StatusInternalServerError, err.Error())
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 // GET /static/{resource_id}
 func GetStatic(w http.ResponseWriter, r *http.Request) {
 	box := packr.NewBox("static")

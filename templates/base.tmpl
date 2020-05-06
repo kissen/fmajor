@@ -14,6 +14,12 @@
 		        <a href="/">
 				<h1>File Hosting Service</h1>
 		        </a>
+
+			{{if .IsAuthorized}}
+				<form class="logout_form" action="/logout" method="post">
+					<input type="image" title="Log Out" src="/static/log-out.svg">
+				</form>
+			{{end}}
 		</header>
 
 		<main>

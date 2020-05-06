@@ -20,7 +20,7 @@
 header {
     background-color: var(--accent);
     color: var(--accent-ink);
-    padding: var(--small);
+    padding: var(--small) 0 var(--small) 0;
     white-space: nowrap;
     width: 100%;
 }
@@ -39,10 +39,10 @@ header a {
 /* headings */
 
 h1 {
-    display: inline;
+    display: inline-block;
     font-size: var(--large);
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 var(--small);
 }
 
 h2 {
@@ -67,7 +67,14 @@ main {
 .error {
     margin: auto;
     max-width: 32em;
+}
+
+.error h2 {
     text-align: center;
+}
+
+.error p {
+    padding: var(--small);
 }
 
 /* individual files and some forms are embedded in a filled

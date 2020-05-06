@@ -99,7 +99,7 @@ func loadConfig() {
 			log.Println(err)
 		}
 
-		log.Fatal("missing configuration file, maybe supply one with the -c flag")
+		log.Fatal("missing valid configuration file, maybe supply one with the -c flag")
 	}
 }
 

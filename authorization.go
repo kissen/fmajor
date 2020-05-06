@@ -101,9 +101,9 @@ func SetUnauthorized(w http.ResponseWriter) error {
 	return setCookie(w, &ac)
 }
 
-// Return whether pass is a valid Passphrase defined in the configuration
+// Return whether pass is a valid password set up in the configuration
 // file.
-func IsValidPassphrase(pass string) bool {
+func IsValidPassword(pass string) bool {
 	pb := []byte(pass)
 
 	for _, hs := range GetConfig().PassHashes {

@@ -8,7 +8,7 @@ to install.
 ## Features
 
 * Upload, download and delete files all from the web interface.  Only
-  users with a passphrase can upload and delete file but *everyone can
+  users with a password can upload and delete file but *everyone can
   download all uploaded files assuming they have the link*.
 
 * `fmajor` is compiled to one static binary, which includes all
@@ -21,7 +21,7 @@ to install.
 
 * `fmajor` does not include transport encryption (i.e. HTTPS). Please
   use a proxy like `nginx` with TLS enabled to ensure that nobody
-  listens to your login passphrase.
+  listens to your login password.
 
 ## Install
 
@@ -56,7 +56,7 @@ you know how to proxy and secure HTTP services with something like
 
    You should now have a configuration file `/etc/fmajor.conf`.
 
-5. You need to set up at least one passphrase. Without a passphrase,
+5. You need to set up at least one password. Without a password,
    you will not be able to log in and therefore upload files.
 
    The easiest way is to use the `htpasswd` tool to generate the
@@ -65,7 +65,7 @@ you know how to proxy and secure HTTP services with something like
 
 		$ htpasswd -n -B -C 12 "" | tr -d ':\n'
 
-   and you will be prompted for the passphrase. The hash is printed to
+   and you will be prompted for the password. The hash is printed to
    `stdout`.
 
    Then open `/etc/fmajor.conf` with a text editor and edit section

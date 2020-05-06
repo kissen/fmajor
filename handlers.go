@@ -50,13 +50,13 @@ func GetLogin(w http.ResponseWriter, r *http.Request) {
 
 // POST /login
 func PostLogin(w http.ResponseWriter, r *http.Request) {
-	passphrase := r.FormValue("passphrase")
-	if passphrase == "" {
-		DoError(w, r, http.StatusBadRequest, "missing passphrase")
+	password := r.FormValue("password")
+	if password == "" {
+		DoError(w, r, http.StatusBadRequest, "missing password")
 		return
 	}
 
-	if !IsValidPassphrase(passphrase) {
+	if !IsValidPassword(password) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}

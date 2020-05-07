@@ -142,11 +142,27 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 	defer fd.Close()
 	lease.Unlock()
 
+	// set content type header
+
 	contentType := fm.ContentType
 	w.Header().Set("Content-Type", contentType)
 
+	// set disposition header; this is so only safe content types
+	// are shown inline
+
+	contentDisposition := "attachment"
+	if fm.Inline() {
+		contentDisposition = "inline"
+	}
+
+	w.Header().Set("Content-Disposition", contentDisposition)
+
+	// set length header
+
 	contentLength := strconv.FormatInt(fm.Size, 10)
 	w.Header().Set("Content-Length", contentLength)
+
+	// write out file
 
 	if _, err := io.Copy(w, fd); err != nil {
 		log.Printf(`serving fileId="%v" failed with err="%v"`, fileId, err)

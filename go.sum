@@ -34,6 +34,8 @@ github.com/kissen/httpstatus v0.0.0-20200311095614-987396411254 h1:DY6QO/U1jEZJ/
 github.com/kissen/httpstatus v0.0.0-20200311095614-987396411254/go.mod h1:uWKuTkTW24lTas9UVBdG0hde1fMAvmc6ZMtHdCCcUGY=
 github.com/kissen/httpstatus v1.0.0 h1:9l+MKWuhJGPxP+yTCZyDuB/FeDyxGC2WaGjOqXhBbTE=
 github.com/kissen/httpstatus v1.0.0/go.mod h1:8yzcLkp+cVhB2rhMzxxZxu1v/IUfiBjjzEwzN/zgOEI=
+github.com/kissen/stringset v1.0.0 h1:HyLlCU/U+XHSJpmVKjhLz4PWdFALhvJfFbRSlwZsJcA=
+github.com/kissen/stringset v1.0.0/go.mod h1:Xsqah6oXc+ZO4GZgFblCNzHn6Pt6Z/wYUCnZfwXxeA0=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=

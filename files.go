@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
+	"github.com/kissen/stringset"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
@@ -17,6 +18,30 @@ import (
 	"strconv"
 	"time"
 )
+
+// Contains all mime types for which File.Inline should return
+// true, that is those mime types that should be shown inline (in
+// the web browser). Initialized in init().
+var inlineMimeTypes stringset.StringSet
+
+func init() {
+	// Initalize inlineMimeTypes. Based on a list of common MIME described types on
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+
+	inlineMimeTypes = stringset.NewWith(
+		"audio/aac", "image/bmp", "text/css", "text/csv",
+		"application/epub+zip", "image/gif", "image/jpeg",
+		"text/javascript", "application/json",
+		"application/ld+json", "audio/midi", "audio/x-midi",
+		"text/javascript", "audio/mpeg", "video/mpeg",
+		"audio/ogg", "video/ogg", "application/ogg",
+		"audio/opus", "font/otf", "image/png",
+		"application/pdf", "image/svg+xml",
+		"application/x-shockwave-flash", "image/tiff",
+		"video/mp2t", "text/plain", "audio/wav", "audio/webm",
+		"video/webm", "image/webp", "application/xml",
+	)
+}
 
 type File struct {
 	// The Id of this file. It is the randomly chosen
@@ -73,6 +98,12 @@ func (f *File) HumanSize() string {
 	} else {
 		return humanize.IBytes(uint64(f.Size))
 	}
+}
+
+// Return whether the file should be inlined, that is shown as-is
+// in the browser. This makes sense for images and simple text files.
+func (f *File) Inline() bool {
+	return inlineMimeTypes.Contains(f.ContentType)
 }
 
 // Return upload timestamp as human-readable string.

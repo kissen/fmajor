@@ -19,7 +19,7 @@
 			    <input type="hidden" name="id" value="{{.Id}}" />
 			    <input type="image" title="Delete" src="/static/trash-2.svg">
 		    </form>
-		    <a href="/files/{{.Id}}/{{.Name}}">{{.Name}}</a>
+		    <a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>{{.Name}}</a>
 		    <div class="meta">
 			    {{.HumanUploadedOn}} {{.HumanSize}}
 		    </div>

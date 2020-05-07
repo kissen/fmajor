@@ -70,14 +70,7 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 
 // POST /logout
 func PostLogout(w http.ResponseWriter, r *http.Request) {
-	authed, err := IsAuthorized(r)
-	if err != nil {
-		DoError(w, r, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if !authed {
-		DoError(w, r, http.StatusBadRequest, "not logged in")
+	if authed := ErrorIfNotAuthorized(w, r); !authed {
 		return
 	}
 
@@ -162,12 +155,9 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 
 // POST /submit
 func PostSubmit(w http.ResponseWriter, r *http.Request) {
-	if ok, _ := IsAuthorized(r); !ok {
-		DoError(w, r, http.StatusUnauthorized, "/submit requires log in")
+	if authed := ErrorIfNotAuthorized(w, r); !authed {
 		return
 	}
-
-	config := GetConfig()
 
 	r.Body = http.MaxBytesReader(w, r.Body, config.MaxFileSize)
 	r.ParseMultipartForm(16 * 1024 * 1024) // 16 MiB buffer
@@ -193,8 +183,7 @@ func PostSubmit(w http.ResponseWriter, r *http.Request) {
 
 // POST /delete
 func PostDelete(w http.ResponseWriter, r *http.Request) {
-	if ok, _ := IsAuthorized(r); !ok {
-		DoError(w, r, http.StatusUnauthorized, "/delete requires log in")
+	if authed := ErrorIfNotAuthorized(w, r); !authed {
 		return
 	}
 
@@ -215,14 +204,37 @@ func DoError(w http.ResponseWriter, r *http.Request, status int, message string)
 	Error(status, message).ServeHTTP(w, r)
 }
 
+// Check whether r is an privileged request, i.e. whether it contains
+// a valid log in cookie.
+//
+// If this request is in fact privileged, this function returns true
+// and does not touch /he response writer. If the request is not privileged,
+// write an error to w and return false.
+func ErrorIfNotAuthorized(w http.ResponseWriter, r *http.Request) (authed bool) {
+	var err error
+
+	authed, err = IsAuthorized(r)
+	if err != nil {
+		DoError(w, r, http.StatusUnauthorized, err.Error())
+		return false
+	}
+
+	if !authed {
+		DoError(w, r, http.StatusUnauthorized, "not logged in")
+		return false
+	}
+
+	return true
+}
+
 // Return an error handler for status.
-func Error(status int, message string) http.HandlerFunc {
+func Error(status int, cause string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vs := map[string]interface{}{
 			"Status":      status,
 			"StatusText":  http.StatusText(status),
 			"Description": httpstatus.Describe(status),
-			"Cause":       message,
+			"Cause":       cause,
 		}
 
 		Render(w, r, "error.tmpl", vs)

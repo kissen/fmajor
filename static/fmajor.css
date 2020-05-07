@@ -110,14 +110,6 @@ main {
     padding: var(--small);
 }
 
-.boxinfo {
-    font-size: var(--small);
-    margin-left: var(--medium);
-    margin-right: var(--medium);
-    padding-left: var(--medium);
-    padding-right: var(--medium);
-}
-
 /* the upload form */
 
 .upload_form {

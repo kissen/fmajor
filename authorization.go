@@ -66,19 +66,11 @@ func init() {
 // Return whether request r is authenticated to upload, delete and
 // list files.
 func IsAuthorized(r *http.Request) (authorized bool, err error) {
-	cookie, err := r.Cookie(AUTHORIZED_COOKIE)
-	if err != nil {
-		return false, errors.Wrap(err, "could not read cookie from request")
+	if isAuthorizedWithBasicAuth(r) {
+		return true, nil
 	}
 
-	var ac AuthorizedCookie
-
-	encoder := securecookie.New(HashKey, BlockKey)
-	if err := encoder.Decode(AUTHORIZED_COOKIE, cookie.Value, &ac); err != nil {
-		return false, errors.Wrap(err, "could not decode cookie")
-	}
-
-	return ac.Authorized(), nil
+	return isAuthorizedWithCookie(r)
 }
 
 // Set a cookie on w that indicates that this user is logged in.
@@ -115,6 +107,38 @@ func IsValidPassword(pass string) bool {
 	}
 
 	return false
+}
+
+// Return whether request r is authenticated to upload, delete and
+// list files based on HTTP basic auth.
+//
+// This is for using fmajor from scripts with curl and the like.
+func isAuthorizedWithBasicAuth(r *http.Request) (authed bool) {
+	if _, password, ok := r.BasicAuth(); !ok {
+		return false
+	} else {
+		return IsValidPassword(password)
+	}
+}
+
+// Return whether request r is authenticated to upload, delete and
+// list files based on the cookies supplied with the request.
+//
+// This is the typical authorization method used with the browser.
+func isAuthorizedWithCookie(r *http.Request) (authed bool, err error) {
+	cookie, err := r.Cookie(AUTHORIZED_COOKIE)
+	if err != nil {
+		return false, errors.Wrap(err, "could not read cookie from request")
+	}
+
+	var ac AuthorizedCookie
+
+	encoder := securecookie.New(HashKey, BlockKey)
+	if err := encoder.Decode(AUTHORIZED_COOKIE, cookie.Value, &ac); err != nil {
+		return false, errors.Wrap(err, "could not decode cookie")
+	}
+
+	return ac.Authorized(), nil
 }
 
 func setCookie(w http.ResponseWriter, ac *AuthorizedCookie) error {

@@ -32,7 +32,7 @@ the following commands.
 	$ go get -u github.com/gobuffalo/packr/packr
 	$ go get -u github.com/kissen/fmajor
 
-	$ cd $GOPATH/github.com/src/kissen/fmajor
+	$ cd "$GOPATH/src/github.com/kissen/fmajor"
 	$ packr install
 
 You should now have `fmajor` available on your system.

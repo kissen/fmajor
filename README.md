@@ -23,24 +23,32 @@ to install.
   use a proxy like `nginx` with TLS enabled to ensure that nobody
   listens to your login password.
 
-## Install
+## Building
+
+`fmajor` uses [gobuffalo/packr](https://github.com/gobuffalo/packr) to
+compile all resources into a single binary. Build `fmajor` by running
+the following commands.
+
+	$ go get -u github.com/gobuffalo/packr/packr
+	$ go get -u github.com/kissen/fmajor
+
+	$ cd "$GOPATH/src/github.com/kissen/fmajor"
+	$ packr install
+
+You should now have `fmajor` available on your system.
+
+## Setup With `systemd`
 
 The following instructions were tested on Debian 10 and assume that
 you know how to proxy and secure HTTP services with something like
 `nginx`.
 
-1. Make sure all prerequisites are installed. You will need `git` and
-   `go` version 1.13 or later.
+1. Build `fmajor` like explained in the previous section. You can do
+   this on your workstation.
 
-2. Download, build and install the `fmajor` program.
-
-		$ go get github.com/kissen/fmajor
-		$ go build github.com/kissen/fmajor
-
-   You should now have an `fmajor` binary in your working directory.
-   Copy it to a reasonable location on the file system.
-
-		# cp fmajor /usr/bin/fmajor
+2. Move the `fmajor` binary to a reasonable place on your server.
+   This tutorial assumes that place to be `/usr/bin/fmajor`. All following
+   commands need to be run on your server as `root`.
 
 3. Create a dedicated user for running `fmajor`.
 
@@ -60,7 +68,7 @@ you know how to proxy and secure HTTP services with something like
    you will not be able to log in and therefore upload files.
 
    The easiest way is to use the `htpasswd` tool to generate the
-   hash. On Debian, you can get it in the `apache2-utils`
+   hash. On Debian, you can get `htpasswd` with the `apache2-utils`
    package. With it installed, run
 
 		$ htpasswd -n -B -C 12 "" | tr -d ':\n'
@@ -68,7 +76,7 @@ you know how to proxy and secure HTTP services with something like
    and you will be prompted for the password. The hash is printed to
    `stdout`.
 
-   Then open `/etc/fmajor.conf` with a text editor and edit section
+   Open `/etc/fmajor.conf` with a text editor and edit section
    `PassHashes` accordingly. It should look something like
 
 		PassHashes = [
@@ -104,7 +112,7 @@ you know how to proxy and secure HTTP services with something like
    `ListenAddress`.
 
    You should configure your reverse proxy to use HTTPS, otherwise
-   third parties will be able to listen to your connection with
+   third parties will be able to spy on your interactions with
    `fmajor`.  [Let's Encrypt](https://letsencrypt.org/) with
    [Certbot](https://certbot.eff.org/) is the canonical choice.
 

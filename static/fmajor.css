@@ -1,3 +1,5 @@
+/* globals */
+
 :root {
     --accent-ink: white;
     --accent: #083d77;
@@ -9,8 +11,13 @@
     --large: 24pt;
 }
 
+@font-face {
+    font-family: "quicksand";
+    src: url("/static/quicksand.ttf") format("truetype");
+}
+
 * {
-    font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
+    font-family: "quicksand", "Helvetica", "Arial", sans-serif;
     padding: 0;
     margin: 0;
 }
@@ -40,14 +47,13 @@ header a {
 
 h1 {
     display: inline-block;
-    font-size: var(--large);
+    font-size: var(--medium);
     margin: 0;
     padding: 0 0 0 var(--small);
 }
 
 h2 {
     font-size: var(--large);
-    font-weight: bold;
     padding-bottom: var(--small);
 }
 

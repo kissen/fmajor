@@ -118,13 +118,14 @@ you know how to proxy and secure HTTP services with something like
 
 ## Credit
 
-(c) 2020 Andreas Schärtl
+(c) 2020 - 2021 Andreas Schärtl
 
-This program (fmajor) is free software: you can redistribute it and/or
-modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version. For a copy of this
-license, see `LICENSE`.
+This program (`fmajor`) is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version. For a copy of this license, see `LICENSE`.
+
+### Feather Icons
 
 Above applies only to the source code. Excluded are included icons
 from the [Feather](https://feathericons.com/) icon set licensed
@@ -156,3 +157,21 @@ The affected files are
 
 	/static/trash-2.svg /static/paperclip.svg /static/upload-cloud.svg
 	/static/log-out.svg
+
+### Fonts
+
+This repository also contains a copy of the [Quicksand](https://github.com/andrew-paglinawan/QuicksandFamily)
+font.
+
+	Copyright 2011 The Quicksand Project Authors (https://github.com/andrew-paglinawan/QuicksandFamily),
+	with Reserved Font Name “Quicksand”.
+
+	This Font Software is licensed under the SIL Open Font License, Version 1.1.
+	This license is copied below, and is also available with a FAQ at:
+	http://scripts.sil.org/OFL
+
+For a full text of the license, please take a look at the
+[Quicksand repository](https://github.com/andrew-paglinawan/QuicksandFamily/blob/master/OFL.txt).
+The affected file is
+
+	/static/quicksand.ttf

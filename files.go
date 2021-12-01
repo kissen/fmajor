@@ -24,6 +24,9 @@ import (
 // the web browser). Initialized in init().
 var inlineMimeTypes stringset.StringSet
 
+// Contains image mime types.
+var imageMimeTypes stringset.StringSet
+
 func init() {
 	// Initalize inlineMimeTypes. Based on a list of common MIME described types on
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
@@ -40,6 +43,11 @@ func init() {
 		"application/x-shockwave-flash", "image/tiff",
 		"video/mp2t", "text/plain", "audio/wav", "audio/webm",
 		"video/webm", "image/webp", "application/xml",
+	)
+
+	imageMimeTypes = stringset.NewWith(
+		"image/bmp", "image/gif", "image/jpeg", "image/png",
+		"image/webp",
 	)
 }
 
@@ -109,6 +117,12 @@ func (f *File) Inline() bool {
 // Return upload timestamp as human-readable string.
 func (f *File) HumanUploadedOn() string {
 	return f.UploadedOnUTC.Format("2006-01-02 15:04")
+}
+
+// Return whether the underlying File is an image. This is used to determine
+// whether a thumbnail should be displayed.
+func (f *File) IsImage() bool {
+	return imageMimeTypes.Contains(f.ContentType)
 }
 
 // Get a listing of all uploaded files.

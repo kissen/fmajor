@@ -162,6 +162,12 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 	contentLength := strconv.FormatInt(fm.Size, 10)
 	w.Header().Set("Content-Length", contentLength)
 
+	// set last-modified header
+
+	rfc113 := "Mon, 02 Jan 2006 15:04:05 MST"
+	lastModified := fm.UploadedOnUTC.Format(rfc113)
+	w.Header().Set("Last-Modified", lastModified)
+
 	// write out file
 
 	if _, err := io.Copy(w, fd); err != nil {

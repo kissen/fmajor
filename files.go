@@ -108,7 +108,7 @@ func (f *File) Inline() bool {
 
 // Return upload timestamp as human-readable string.
 func (f *File) HumanUploadedOn() string {
-	return f.UploadedOnUTC.Format("2006/01/02 15:04")
+	return f.UploadedOnUTC.Format("2006-01-02 15:04")
 }
 
 // Get a listing of all uploaded files.

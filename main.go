@@ -16,6 +16,7 @@ func main() {
 	router.HandleFunc("/logout", PostLogout).Methods("POST")
 	router.HandleFunc("/favicon.ico", GetFavicon).Methods("GET")
 	router.HandleFunc("/files/{file_id:.+}/{file_name:.+}", GetFile).Methods("GET")
+	router.HandleFunc("/files/{file_id:.+}/{file_name:.+}", HeadFile).Methods("HEAD")
 	router.HandleFunc("/static/{resource_id:.+}", GetStatic).Methods("GET")
 	router.HandleFunc("/submit", PostSubmit).Methods("POST")
 	router.HandleFunc("/delete", PostDelete).Methods("POST")

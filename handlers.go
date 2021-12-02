@@ -105,50 +105,44 @@ func GetFavicon(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/static/paperclip.svg", http.StatusPermanentRedirect)
 }
 
-// GET /files/{file_id}/{file_name}
-func GetFile(w http.ResponseWriter, r *http.Request) {
+// Read out requested files for a request to /files/{file_id}/{file_name}
+// and write the headers to the response body. Used in both the GET and HEAD
+// requests to /files.
+func WriteHeadersForFile(w http.ResponseWriter, r *http.Request) (fm *File, ok bool) {
+	// First parse out the requested file id from the request.
+
 	fileId, ok := mux.Vars(r)["file_id"]
 	if !ok {
 		DoError(w, r, http.StatusBadRequest, "missing file_id")
-		return
+		return nil, false
 	}
 
 	fileName, ok := mux.Vars(r)["file_name"]
 	if !ok {
 		DoError(w, r, http.StatusBadRequest, "missing file_name")
-		return
+		return nil, false
 	}
-
-	lease := LockRead()
-	defer lease.Unlock()
 
 	fm, err := LoadFile(fileId)
 	if err != nil {
 		DoError(w, r, http.StatusNotFound, err.Error())
-		return
+		return nil, false
 	}
 
 	if fileName != fm.Name {
 		DoError(w, r, http.StatusNotFound, "")
-		return
+		return nil, false
 	}
 
-	fd, err := os.Open(fm.LocalPath)
-	if err != nil {
-		DoError(w, r, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	defer fd.Close()
-	lease.Unlock()
-
-	// set content type header
+	// Set content type header. This is used by browser to determine how
+	// a given object is to be displayed (e.g. inline vs download).
 
 	contentType := fm.ContentType
 	w.Header().Set("Content-Type", contentType)
 
-	// set disposition header; this is so only safe content types
-	// are shown inline
+	// Set disposition header. This is so only safe content types are shown
+	// inline. In particular, we do not want to show HTML files as they would be
+	// served like a normal page rather than a download.
 
 	contentDisposition := "attachment"
 	if fm.Inline() {
@@ -157,22 +151,79 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Disposition", contentDisposition)
 
-	// set length header
+	// Set length header. Not really necessary as we aren't keeping the connection
+	// open, but it's nice to do so.
 
 	contentLength := strconv.FormatInt(fm.Size, 10)
 	w.Header().Set("Content-Length", contentLength)
 
-	// set last-modified header
+	// Set last-modified header. Browsers can use this information to determine
+	// whether a given object should be re-downloaded.
 
 	rfc113 := "Mon, 02 Jan 2006 15:04:05 MST"
 	lastModified := fm.UploadedOnUTC.Format(rfc113)
 	w.Header().Set("Last-Modified", lastModified)
 
-	// write out file
+	// Set etag header. Similar to the last-modified header, browsers use this
+	// unique file id to check with their caches. The etag is an opaque unique
+	// id for a given file.  As such we can just use our uuid.
+
+	w.Header().Set("ETag", fm.Id)
+
+	// Success! Return the file for further processing.
+
+	return fm, true
+}
+
+// GET /files/{file_id}/{file_name}
+func GetFile(w http.ResponseWriter, r *http.Request) {
+	var (
+		fm  *File
+		ok  bool
+		fd  *os.File
+		err error
+	)
+
+	// Aquire the lease so the underlying file does not get to change while we
+	// are serving it.
+
+	lease := LockRead()
+	defer lease.Unlock()
+
+	// Write out headers.
+
+	if fm, ok = WriteHeadersForFile(w, r); !ok {
+		return
+	}
+
+	// Open actual file and serve it to the client.
+
+	if fd, err = os.Open(fm.LocalPath); err != nil {
+		DoError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	defer fd.Close()
+	lease.Unlock()
 
 	if _, err := io.Copy(w, fd); err != nil {
-		log.Printf(`serving fileId="%v" failed with err="%v"`, fileId, err)
+		log.Printf(`serving fileId="%v" failed with err="%v"`, fm.Id, err)
 	}
+}
+
+// HEAD /files/{file_id}/{file_name}
+func HeadFile(w http.ResponseWriter, r *http.Request) {
+	// Acquire the lease. Technically there is a race condition between HEAD and
+	// GET request, but in practice the worst thing that can happen is that a
+	// deleted file will be shown as cached content by the browser.
+
+	lease := LockRead()
+	defer lease.Unlock()
+
+	// Really we just have to write out the headers. WriteHeadersForFile handles
+	// all errors for us.
+
+	WriteHeadersForFile(w, r)
 }
 
 // POST /submit

@@ -185,6 +185,11 @@ func WriteHeadersForFile(w http.ResponseWriter, r *http.Request) (fm *File, ok b
 
 	w.Header().Set("ETag", fm.Id)
 
+	// Our files are unique, so we set a very long expiry time for caches.
+	// Really we want browsers to cache our content as aggressively as they can.
+
+	w.Header().Set("Cache-Control", "max-age=15552000")
+
 	// Success! Return the file for further processing.
 
 	return fm, true

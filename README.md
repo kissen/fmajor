@@ -27,7 +27,7 @@ to install.
 
 Assuming you have `go` version 1.17 or later, you should only have to run
 
-	$ go install github.com/kissen/fmajor@latest
+    $ go install github.com/kissen/fmajor@latest
 
 You should now have `fmajor` available on your system.
 
@@ -46,15 +46,15 @@ you know how to proxy and secure HTTP services with something like
 
 3. Create a dedicated user for running `fmajor`.
 
-		# adduser --home /var/lib/fmajor --shell /sbin/nologin --disabled-password fmajor
+        # adduser --home /var/lib/fmajor --shell /sbin/nologin --disabled-password fmajor
 
    This creates a user named `fmajor` with home directory `/var/lib/fmajor`
    which is where we will let `fmajor` put all its uploads.
 
 4. Copy the configuration file to `/etc`.
 
-		# wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.conf
-		# mv fmajor.conf /etc/fmajor.conf
+        # wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.conf
+        # mv fmajor.conf /etc/fmajor.conf
 
    You should now have a configuration file `/etc/fmajor.conf`.
 
@@ -65,7 +65,7 @@ you know how to proxy and secure HTTP services with something like
    hash. On Debian, you can get `htpasswd` with the `apache2-utils`
    package. With it installed, run
 
-		$ htpasswd -n -B -C 12 "" | tr -d ':\n'
+        $ htpasswd -n -B -C 12 "" | tr -d ':\n'
 
    and you will be prompted for the password. The hash is printed to
    `stdout`.
@@ -73,29 +73,29 @@ you know how to proxy and secure HTTP services with something like
    Open `/etc/fmajor.conf` with a text editor and edit section
    `PassHashes` accordingly. It should look something like
 
-		PassHashes = [
-			"$2y$12$uTLL4JVVyJg9aunt.hyraej3m0yW6siY2cAQ1MakmUxtxgR4EoPbK"
-		]
+        PassHashes = [
+            "$2y$12$uTLL4JVVyJg9aunt.hyraej3m0yW6siY2cAQ1MakmUxtxgR4EoPbK"
+        ]
 
 6. Install the `systemd` service file.
 
-		# wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.service
-		# mv fmajor.service /lib/systemd/system/fmajor.service
-		# systemctl daemon-reload
+        # wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.service
+        # mv fmajor.service /lib/systemd/system/fmajor.service
+        # systemctl daemon-reload
 
 7. You can now start the `fmajor` service with
 
-		# systemctl start fmajor
+        # systemctl start fmajor
 
    which will make `systemd` take care of keeping your logs. Access
    the logs using
 
-		# journalctl -u fmajor.service
+        # journalctl -u fmajor.service
 
    If you want `fmajor` to start during boot, enable the service with
    `systemctl` like so
 
-		# systemctl enable fmajor
+        # systemctl enable fmajor
 
 
 8. `fmajor` listens to the `ListenAddress` defined in configuration
@@ -112,7 +112,7 @@ you know how to proxy and secure HTTP services with something like
 
 ## Credit
 
-(c) 2020 - 2021 Andreas Schärtl
+(c) 2020 - 2022 Andreas Schärtl
 
 This program (`fmajor`) is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by the Free
@@ -125,47 +125,72 @@ Above applies only to the source code. Excluded are included icons
 from the [Feather](https://feathericons.com/) icon set licensed
 under the following terms.
 
-	The MIT License (MIT)
+    The MIT License (MIT)
 
-	Copyright (c) 2013-2017 Cole Bemis
+    Copyright (c) 2013-2017 Cole Bemis
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
 
-	The above copyright notice and this permission notice shall be included in all
-	copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-	SOFTWARE.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 
 The affected files are
 
-	/static/trash-2.svg /static/paperclip.svg /static/upload-cloud.svg
-	/static/log-out.svg
+    /static/trash-2.svg /static/paperclip.svg /static/upload-cloud.svg
+    /static/log-out.svg
 
 ### Fonts
 
-This repository also contains a copy of the [Quicksand](https://github.com/andrew-paglinawan/QuicksandFamily)
-font.
+This repository contains file `/static/goregular.woff` which is based on the open source
+[Go Regular](https://github.com/golang/image/tree/master/font/gofont/ttfs) font.
+Go Regular is distributed under the following conditions.
 
-	Copyright 2011 The Quicksand Project Authors (https://github.com/andrew-paglinawan/QuicksandFamily),
-	with Reserved Font Name “Quicksand”.
+    These fonts were created by the Bigelow & Holmes foundry specifically for the
+    Go project. See https://blog.golang.org/go-fonts for details.
 
-	This Font Software is licensed under the SIL Open Font License, Version 1.1.
-	This license is copied below, and is also available with a FAQ at:
-	http://scripts.sil.org/OFL
+    They are licensed under the same open source license as the rest of the Go
+    project's software:
 
-For a full text of the license, please take a look at the
-[Quicksand repository](https://github.com/andrew-paglinawan/QuicksandFamily/blob/master/OFL.txt).
-The affected file is
+    Copyright (c) 2016 Bigelow & Holmes Inc.. All rights reserved.
 
-	/static/quicksand.ttf
+    Distribution of this font is governed by the following license. If you do not
+    agree to this license, including the disclaimer, do not distribute or modify
+    this font.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+            * Redistributions of source code must retain the above copyright notice,
+            this list of conditions and the following disclaimer.
+
+            * Redistributions in binary form must reproduce the above copyright notice,
+            this list of conditions and the following disclaimer in the documentation
+            and/or other materials provided with the distribution.
+
+            * Neither the name of Google Inc. nor the names of its contributors may be
+            used to endorse or promote products derived from this software without
+            specific prior written permission.
+
+    DISCLAIMER: THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+    THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

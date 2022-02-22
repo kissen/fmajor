@@ -12,12 +12,12 @@
 }
 
 @font-face {
-    font-family: "quicksand";
-    src: url("/static/quicksand.ttf") format("truetype");
+    font-family: "goregular";
+    src: url("/static/goregular.woff") format("woff");
 }
 
 * {
-    font-family: "quicksand", "Helvetica", "Arial", sans-serif;
+    font-family: "goregular", "Helvetica", "Arial", sans-serif;
     padding: 0;
     margin: 0;
 }

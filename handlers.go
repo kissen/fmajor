@@ -175,7 +175,7 @@ func WriteHeadersForFile(w http.ResponseWriter, r *http.Request) (fm *File, ok b
 	// Set last-modified header. Browsers can use this information to determine
 	// whether a given object should be re-downloaded.
 
-	rfc113 := "Mon, 02 Jan 2006 15:04:05 MST"
+	rfc113 := "Mon, 02 Jan 2006 15:04:05 GMT"
 	lastModified := fm.UploadedOnUTC.Format(rfc113)
 	w.Header().Set("Last-Modified", lastModified)
 

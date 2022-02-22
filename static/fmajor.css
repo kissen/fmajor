@@ -27,8 +27,8 @@
 header {
     background-color: var(--accent);
     color: var(--accent-ink);
-    padding-bottom: var(--small);
-    white-space: nowrap;
+    height: var(--large);
+    padding-bottom: 0;
     width: 100%;
 }
 
@@ -38,8 +38,8 @@ header a {
 }
 
 .logout_form {
-    float: right;
     padding-right: 2em;
+    margin: 0;
 }
 
 /* headings */
@@ -148,6 +148,7 @@ img.preview {
 /* our fancy image buttons */
 
 input[type="image"] {
+    background-color: var(--accent);
     float: right;
     height: var(--large);
     padding: 4pt;

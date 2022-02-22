@@ -11,10 +11,6 @@
 
 	<body>
 		<header>
-            <a href="/">
-				<h1>fmajor</h1>
-            </a>
-
 			{{if .IsAuthorized}}
 				<form class="logout_form" action="/logout" method="post">
 					<input type="image" title="Log Out" src="/static/log-out.svg">

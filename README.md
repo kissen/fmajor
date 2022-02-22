@@ -25,15 +25,9 @@ to install.
 
 ## Building
 
-`fmajor` uses [gobuffalo/packr](https://github.com/gobuffalo/packr) to
-compile all resources into a single binary. Build `fmajor` by running
-the following commands.
+Assuming you have `go` version 1.17 or later, you should only have to run
 
-	$ go get -u github.com/gobuffalo/packr/packr
-	$ go get -u github.com/kissen/fmajor
-
-	$ cd "$GOPATH/src/github.com/kissen/fmajor"
-	$ packr install
+	$ go install github.com/kissen/fmajor@latest
 
 You should now have `fmajor` available on your system.
 

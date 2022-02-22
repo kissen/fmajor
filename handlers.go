@@ -1,9 +1,7 @@
 package main
 
 import (
-	"github.com/gobuffalo/packr"
-	"github.com/gorilla/mux"
-	"github.com/kissen/httpstatus"
+	"embed"
 	"io"
 	"log"
 	"mime"
@@ -11,7 +9,13 @@ import (
 	"os"
 	"path"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/kissen/httpstatus"
 )
+
+//go:embed static/*
+var static embed.FS
 
 // GET /
 func GetIndex(w http.ResponseWriter, r *http.Request) {
@@ -83,19 +87,30 @@ func PostLogout(w http.ResponseWriter, r *http.Request) {
 
 // GET /static/{resource_id}
 func GetStatic(w http.ResponseWriter, r *http.Request) {
-	box := packr.NewBox("static")
-	filename := path.Base(r.URL.Path)
+	var filename string
+	var bytes []byte
+	var err error
 
-	if !box.Has(filename) {
+	// Open the file.
+
+	if filename = path.Base(r.URL.Path); filename == "" {
+		DoError(w, r, http.StatusBadRequest, "empty filename")
+		return
+	}
+
+	if bytes, err = static.ReadFile(path.Join("static", filename)); err != nil {
 		DoError(w, r, http.StatusNotFound, "no resource with that name")
 		return
 	}
 
-	mimetype := mime.TypeByExtension(path.Ext(filename))
+	// Set mime type.
 
+	mimetype := mime.TypeByExtension(path.Ext(filename))
 	w.Header().Add("Content-Type", mimetype)
 
-	if _, err := w.Write(box.Bytes(filename)); err != nil {
+	// Send out file.
+
+	if _, err := w.Write(bytes); err != nil {
 		log.Printf(`serving static filename="%v" failed with err="%v"`, filename, err)
 	}
 }

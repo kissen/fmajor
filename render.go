@@ -1,10 +1,14 @@
 package main
 
 import (
-	"github.com/gobuffalo/packr"
+	"embed"
 	"html/template"
 	"net/http"
+	"path"
 )
+
+//go:embed templates/*.tmpl
+var templates embed.FS
 
 // Render out page to (w, r) with parameters vs.
 //
@@ -13,17 +17,18 @@ import (
 // because that function uses Render and I would prefer to avoid infinite
 // recursion.
 func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]interface{}) {
-	// prepare template files
+	var ts *template.Template
+	var err error
 
-	box := packr.NewBox("templates")
+	baseTemplate := path.Join("templates", "base.tmpl")
+	pageTemplate := path.Join("templates", page)
 
-	ts, err := template.New("base").Parse(box.String("base.tmpl"))
-	if err != nil {
+	if ts, err = template.New("base").ParseFS(templates, baseTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if _, err := ts.New("page").Parse(box.String(page)); err != nil {
+	if _, err := ts.New("page").ParseFS(templates, pageTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

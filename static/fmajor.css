@@ -122,6 +122,7 @@ img.preview {
 }
 
 .login_form input[type="password"] {
+    letter-spacing: 0.3em;
     margin-bottom: 1em;
     padding: var(--small);
 }

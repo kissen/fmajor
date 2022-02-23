@@ -16,7 +16,7 @@ const (
 
 	// How long to keep a user logged in after log in.
 	// Initialized in init().
-	LOGIN_DURATION = 15 * time.Minute
+	LOGIN_DURATION = 14 * 24 * time.Hour
 )
 
 var (

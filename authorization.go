@@ -11,11 +11,9 @@ import (
 
 const (
 	// Key used to identify cookies of type AuthorizedCookie.
-	// Initialized in init().
 	AUTHORIZED_COOKIE = "AuthorizedCookie"
 
 	// How long to keep a user logged in after log in.
-	// Initialized in init().
 	LOGIN_DURATION = 14 * 24 * time.Hour
 )
 
@@ -42,12 +40,17 @@ type AuthorizedCookie struct {
 	LoggedIn bool
 }
 
+// Return the expiry date for the given cookie. This function ignores the value
+// of LoggedIn, that is it simply returns AuthorizedOnUTC incremented with the
+// fixed login duration.
+func (ac *AuthorizedCookie) ExpiryDate() time.Time {
+	return ac.AuthorizedOnUTC.Add(LOGIN_DURATION)
+}
+
 // Return whether user with cookie c is authorized to access
 // restricted resource at this current time.
 func (ac *AuthorizedCookie) Authorized() bool {
-	loginExpiresOn := ac.AuthorizedOnUTC.Add(LOGIN_DURATION)
-	expired := time.Now().UTC().After(loginExpiresOn)
-
+	expired := time.Now().UTC().After(ac.ExpiryDate())
 	return ac.LoggedIn && !expired
 }
 
@@ -125,11 +128,12 @@ func setCookie(w http.ResponseWriter, ac *AuthorizedCookie) error {
 	}
 
 	cookie := &http.Cookie{
+		Expires: ac.ExpiryDate(),
+		HttpOnly: true,
 		Name:     AUTHORIZED_COOKIE,
-		Value:    value,
 		Path:     "/",
 		Secure:   false,
-		HttpOnly: true,
+		Value:    value,
 	}
 
 	http.SetCookie(w, cookie)

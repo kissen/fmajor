@@ -7,27 +7,28 @@
 
 {{define "main"}}
 	<div class="box">
-		<form class="upload_form" enctype="multipart/form-data" action="/submit" method="post">
-			<input type="file" name="file" />
-			<input type="image" title="Upload To Public" src="/static/upload-cloud.svg">
+		<form class="upload_form" enctype="multipart/form-data" action="javascript:void(0)" method="POST">
+			<input type="file" name="file" id="file"/>
+			<input type="image" title="Upload To Public" src="/static/upload-cloud.svg" onclick="uploadFile()">
 		</form>
+        <div id="file_progress"></div>
 	</div>
 
 	{{range .Uploads}}
 		<div class="box">
-		    <form action="/delete" method="post">
-			    <input type="hidden" name="id" value="{{.Id}}" />
-			    <input type="image" title="Delete" src="/static/trash-2.svg">
-		    </form>
-            {{if .IsImage}}
-                <img loading="lazy" class="preview" src="/files/{{.Id}}/{{.Name}}">
-            {{end}}
-            <div>
-                <a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>{{.Name}}</a>
-                <div class="meta">
-                    {{.HumanUploadedOn}} {{.HumanSize}}
-                </div>
-            </div>
+			<form action="/delete" method="post">
+				<input type="hidden" name="id" value="{{.Id}}" />
+				<input type="image" title="Delete" src="/static/trash-2.svg">
+			</form>
+			{{if .IsImage}}
+				<img loading="lazy" class="preview" src="/files/{{.Id}}/{{.Name}}">
+			{{end}}
+			<div>
+				<a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>{{.Name}}</a>
+				<div class="meta">
+					{{.HumanUploadedOn}} {{.HumanSize}}
+				</div>
+			</div>
 		</div>
 	{{end}}
 {{end}}

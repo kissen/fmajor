@@ -139,6 +139,11 @@ img.preview {
     width: 100%;
 }
 
+#file_progress {
+    font-size: var(--small);
+    letter-spacing: 0.1em;
+}
+
 /* meta information of a single file which contains
  * upload date and file size */
 

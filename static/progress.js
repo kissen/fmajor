@@ -32,7 +32,7 @@ function handleUploadAbort(e) {
 }
 
 function handleUploadError(e) {
-	setProgressTextTo('failed')
+	setProgressTextTo('Upload failed.')
 }
 
 function handleUploadLoad(e) {
@@ -44,7 +44,7 @@ function handleUploadProgress(e) {
 	const total = e.total
 
 	const progress = Math.round(loaded / total * 100)
-	setProgressTextTo(`${progress}%`)
+	setProgressTextTo(`Uploading... ${progress}%`)
 }
 
 function setProgressTextTo(html) {

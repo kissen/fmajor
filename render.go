@@ -1,14 +1,10 @@
 package main
 
 import (
-	"embed"
-	"html/template"
 	"net/http"
-	"path"
-)
 
-//go:embed templates/*.tmpl
-var templates embed.FS
+	"github.com/kissen/fmajor/templates"
+)
 
 // Render out page to (w, r) with parameters vs.
 //
@@ -17,22 +13,6 @@ var templates embed.FS
 // because that function uses Render and I would prefer to avoid infinite
 // recursion.
 func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]interface{}) {
-	var ts *template.Template
-	var err error
-
-	baseTemplate := path.Join("templates", "base.tmpl")
-	pageTemplate := path.Join("templates", page)
-
-	if ts, err = template.New("base").ParseFS(templates, baseTemplate); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if _, err := ts.New("page").ParseFS(templates, pageTemplate); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	// set some flags used by all templates
 
 	if vs == nil {
@@ -45,7 +25,7 @@ func Render(w http.ResponseWriter, r *http.Request, page string, vs map[string]i
 
 	// render out the page to the HTTP writer
 
-	if err := ts.Execute(w, vs); err != nil {
+	if err := templates.Render(w, r, page, vs); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

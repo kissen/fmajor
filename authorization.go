@@ -128,7 +128,7 @@ func setCookie(w http.ResponseWriter, ac *AuthorizedCookie) error {
 	}
 
 	cookie := &http.Cookie{
-		Expires: ac.ExpiryDate(),
+		Expires:  ac.ExpiryDate(),
 		HttpOnly: true,
 		Name:     AUTHORIZED_COOKIE,
 		Path:     "/",

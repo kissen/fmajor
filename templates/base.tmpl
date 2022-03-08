@@ -3,18 +3,18 @@
 <html>
 	<head>
 		<title>{{template "title" .}}</title>
-		<link rel="icon" href="/static/paperclip.svg" type="image/svg+xml">
+		<link rel="icon" href="/static/svg/paperclip.svg" type="image/svg+xml">
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=0.7">
-		<link rel=stylesheet href="/static/fmajor.css">
-		<script src="/static/progress.js"></script>
+		<link rel=stylesheet href="/static/css/fmajor.css">
+		<script src="/static/js/progress.js"></script>
 	</head>
 
 	<body>
 		<header>
 			{{if .IsAuthorized}}
 				<form class="logout_form" action="/logout" method="post">
-					<input type="image" title="Log Out" src="/static/log-out.svg">
+					<input type="image" title="Log Out" src="/static/svg/log-out.svg">
 				</form>
 			{{end}}
 		</header>

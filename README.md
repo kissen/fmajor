@@ -149,12 +149,12 @@ terms.
 
 The affected files are
 
-    /static/trash-2.svg /static/paperclip.svg /static/upload-cloud.svg
-    /static/log-out.svg /static/x-octagon.svg
+    /static/svg/trash-2.svg /static/svg/paperclip.svg /static/svg/upload-cloud.svg
+    /static/svg/log-out.svg /static/svg/x-octagon.svg
 
 ### Fonts
 
-This repository contains file `/static/goregular.woff` which is based on the open source
+This repository contains file `/static/fonts/goregular.woff` which is based on the open source
 [Go Regular](https://github.com/golang/image/tree/master/font/gofont/ttfs) font.
 Go Regular is distributed under the following conditions.
 

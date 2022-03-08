@@ -9,7 +9,7 @@
 	<div class="box">
 		<form class="upload_form" enctype="multipart/form-data" action="javascript:void(0)" method="POST">
 			<input type="file" name="file" id="file"/>
-			<input type="image" id="upload_button" title="Upload To Public" src="/static/upload-cloud.svg" onclick="uploadButtonClicked()">
+			<input type="image" id="upload_button" title="Upload To Public" src="/static/svg/upload-cloud.svg" onclick="uploadButtonClicked()">
 		</form>
         <div id="file_progress"></div>
 	</div>
@@ -18,7 +18,7 @@
 		<div class="box">
 			<form action="/delete" method="post">
 				<input type="hidden" name="id" value="{{.Id}}" />
-				<input type="image" title="Delete" src="/static/trash-2.svg">
+				<input type="image" title="Delete" src="/static/svg/trash-2.svg">
 			</form>
 			{{if .IsImage}}
 				<img loading="lazy" class="preview" src="/files/{{.Id}}/{{.Name}}">

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"io"
 	"log"
 	"mime"
@@ -11,11 +10,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/kissen/fmajor/static"
 	"github.com/kissen/httpstatus"
 )
-
-//go:embed static/*
-var static embed.FS
 
 // GET /
 func GetIndex(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +95,7 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bytes, err = static.ReadFile(path.Join("static", filename)); err != nil {
+	if bytes, err = static.ReadFile(filename); err != nil {
 		DoError(w, r, http.StatusNotFound, "no resource with that name")
 		return
 	}

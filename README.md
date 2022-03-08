@@ -121,9 +121,9 @@ later version. For a copy of this license, see `LICENSE`.
 
 ### Feather Icons
 
-Above applies only to the source code. Excluded are included icons
-from the [Feather](https://feathericons.com/) icon set licensed
-under the following terms.
+Above applies only to the source code. Excluded are included icons derived from
+the [Feather](https://feathericons.com/) icon set licensed under the following
+terms.
 
     The MIT License (MIT)
 
@@ -150,7 +150,7 @@ under the following terms.
 The affected files are
 
     /static/trash-2.svg /static/paperclip.svg /static/upload-cloud.svg
-    /static/log-out.svg
+    /static/log-out.svg /static/x-octagon.svg
 
 ### Fonts
 

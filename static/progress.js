@@ -1,5 +1,55 @@
-function uploadFile() {
-	// (1) Get the file.
+class State {
+	static Ready = new State('Ready')
+	static Downloading = new State('Downloading')
+	static Done = new State('Done')
+
+	constructor(name) {
+		this.name = name
+	}
+
+	static get() {
+		if (window.state === undefined) {
+				window.state = State.Ready
+		}
+
+		return window.state
+	}
+
+	static set(state) {
+		console.log(state)
+
+		// Set global variable.
+
+		window.state = state
+
+		// Update icon on upload button.
+
+		const uploadButton = document.getElementById('upload_button')
+
+		switch (State.get()) {
+			case State.Ready:
+				uploadButton.style.visibility = 'visible'
+				break
+
+			case State.Downloading:
+				uploadButton.style.visibility = 'hidden'
+				break
+
+			case State.Done:
+				uploadButton.style.visibility = 'hidden'
+				break
+		}
+	}
+}
+
+function uploadButtonClicked() {
+	// Check state. We only allow one update at a time for now.
+
+	if (State.get() !== State.Ready) {
+		return
+	}
+
+	// Get the file.
 
 	const files = document.getElementById('file').files
 	const file = files[0]
@@ -8,12 +58,12 @@ function uploadFile() {
 		return
 	}
 
-	// (2) Set up the form.
+	// Set up the form.
 
 	const form = new FormData()
 	form.append('file', file)
 
-	// (3) Set up the request.
+	// Set up the request.
 
 	const tx = new XMLHttpRequest()
 
@@ -22,21 +72,28 @@ function uploadFile() {
 	tx.upload.addEventListener('load', handleUploadLoad)
 	tx.upload.addEventListener('progress', handleUploadProgress)
 
-	// (4) Start the request. The event handlers take care of the rest.
+	// Start the request. The event handlers take care of the rest.
 
 	tx.open('POST', '/submit')
 	tx.send(form)
+
+	// Update global state.
+
+	State.set(State.Downloading)
 }
 
 function handleUploadAbort(e) {
+	State.set(State.Done)
 }
 
 function handleUploadError(e) {
 	setProgressTextTo('Upload failed.')
+	State.set(State.Done)
 }
 
 function handleUploadLoad(e) {
-	location.reload()
+	location.reload(true)
+	State.set(State.Done)
 }
 
 function handleUploadProgress(e) {
@@ -45,6 +102,8 @@ function handleUploadProgress(e) {
 
 	const progress = Math.round(loaded / total * 100)
 	setProgressTextTo(`Uploading... ${progress}%`)
+
+	State.set(State.Downloading)
 }
 
 function setProgressTextTo(html) {

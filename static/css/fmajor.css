@@ -96,12 +96,17 @@ main {
     color: var(--accent-ink);
 }
 
+div.previewbox {
+    float: left;
+    height: 2em;
+    margin-right: 0.5em;
+    width: 2em;
+}
+
 img.preview {
     background-color: var(--accent-ink);
     border-style: solid;
     border-width: 1px;
-    float: left;
-    margin-right: 0.5em;
     max-height: 2em;
     max-width: 2em;
 }

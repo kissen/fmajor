@@ -21,9 +21,11 @@
 				<input type="image" title="Delete" src="/static/svg/trash-2.svg">
 			</form>
 			{{if .HasThumbnail}}
-				<a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>
-					<img loading="lazy" class="preview" src="/thumbnails/{{.Id}}/thumbnail.jpg">
-				</a>
+				<div class="previewbox">
+					<a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>
+						<img loading="lazy" class="preview" src="/thumbnails/{{.Id}}/thumbnail.jpg">
+					</a>
+				</div>
 			{{end}}
 			<div>
 				<a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>{{.Name}}</a>

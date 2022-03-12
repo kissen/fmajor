@@ -3,10 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dustin/go-humanize"
-	"github.com/google/uuid"
-	"github.com/kissen/stringset"
-	"github.com/pkg/errors"
+	"image"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,7 +14,22 @@ import (
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/disintegration/imaging"
+	"github.com/docker/go-units"
+	"github.com/dustin/go-humanize"
+	"github.com/google/uuid"
+	"github.com/kissen/stringset"
+	"github.com/pkg/errors"
 )
+
+// Maximum size an image may be for us to compute a thumbnail.  Unfortunately we
+// have to load all of the image into memory before we can compute the thumbnail
+// so this limitation is necessary.
+const MAX_THUMBNAIL_SOURCE_SIZE = 32 * units.MiB
+
+// Maximum width and height of a generated thumbnail in pixels.
+const MAX_THUMBNAIL_DIM = 100.0
 
 // Contains all mime types for which File.Inline should return
 // true, that is those mime types that should be shown inline (in
@@ -68,8 +80,11 @@ type File struct {
 	// An infered content type for this file.
 	ContentType string
 
-	// The filepath on the local machine.
+	// Absolute filepath on the local machine.
 	LocalPath string
+
+	// Absolute filepath to the thumbnail. May be nil.
+	ThumbnailPath *string
 }
 
 // Return whether any of the fields are set to their zero-value.
@@ -123,6 +138,10 @@ func (f *File) HumanUploadedOn() string {
 // whether a thumbnail should be displayed.
 func (f *File) IsImage() bool {
 	return imageMimeTypes.Contains(f.ContentType)
+}
+
+func (f *File) HasThumbnail() bool {
+	return f.ThumbnailPath != nil
 }
 
 // Get a listing of all uploaded files.
@@ -188,16 +207,23 @@ func LoadFile(id string) (*File, error) {
 //
 // Only call this function if you are holding the global write lock.
 func CreateFile(src io.Reader, filename string) (*File, error) {
+	// figure out meta data
+
 	id := uuid.New().String()
 
 	storageDir := GetConfig().UploadsDirectory
 	baseDir := filepath.Join(storageDir, id)
 	metaPath := filepath.Join(baseDir, "meta.json")
 	storagePath := filepath.Join(baseDir, "storage.bin")
+	thumbnailPath := filepath.Join(baseDir, "thumbnail.jpg")
+
+	// create the directory where all related files are going to be stored
 
 	if err := os.Mkdir(baseDir, 0700); err != nil {
 		return nil, errors.Wrapf(err, `cannot create directory for filename="%v"`, filename)
 	}
+
+	// copy in the actual file
 
 	fd, err := os.Create(storagePath)
 	if err != nil {
@@ -213,6 +239,8 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 		return nil, errors.Wrapf(err, `cannot write storage.bin for id="%v" filename="%v"`, id, filename)
 	}
 
+	// create the meta object
+
 	meta := File{
 		Id:            id,
 		Name:          filename,
@@ -225,6 +253,19 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 	if meta.ContentType == "" {
 		meta.ContentType = "application/octet-stream"
 	}
+
+	// create thumbnail if necessary
+
+	if meta.IsImage() {
+		meta.ThumbnailPath = &thumbnailPath
+
+		if err = createThumbnailFor(&meta, thumbnailPath); err != nil {
+			log.Printf(`could not create thumbnail for id="%v": %v`, meta.Id, err.Error())
+			meta.ThumbnailPath = nil
+		}
+	}
+
+	// write out meta object as json
 
 	metabytes, err := json.Marshal(&meta)
 	if err != nil {
@@ -306,4 +347,64 @@ func DeleteFileAsync(id string) {
 			log.Printf(`could not clean up id="%v"`, id)
 		}
 	}()
+}
+
+func createThumbnailFor(meta *File, filepath string) error {
+	var (
+		err    error
+		fp     *os.File
+		source image.Image
+	)
+
+	// open image file
+
+	if fp, err = os.Open(meta.LocalPath); err != nil {
+		return errors.Wrap(err, "could not open file")
+	}
+
+	defer fp.Close()
+
+	// parse image
+
+	reader := &io.LimitedReader{R: fp, N: MAX_THUMBNAIL_SOURCE_SIZE}
+
+	if source, _, err = image.Decode(reader); err != nil {
+		return errors.Wrap(err, "could not decode image")
+	}
+
+	// check dimensions
+
+	sourceWidth := source.Bounds().Max.X
+	sourceHeight := source.Bounds().Max.Y
+
+	if sourceWidth <= 0 || sourceHeight <= 0 {
+		return fmt.Errorf("bad dimensions %v x %v", sourceWidth, sourceHeight)
+	}
+
+	// compute thumbnail dimensions
+
+	scale := 1.0
+
+	if sourceWidth > sourceHeight {
+		scale = MAX_THUMBNAIL_DIM / float64(sourceWidth)
+	} else {
+		scale = MAX_THUMBNAIL_DIM / float64(sourceHeight)
+	}
+
+	thumbWidth := int(float64(sourceWidth) * scale)
+	thumbHeight := int(float64(sourceHeight) * scale)
+
+	if thumbWidth <= 0 || thumbHeight <= 0 {
+		return fmt.Errorf("bad thumbnail dimensions %v x %v", thumbWidth, thumbHeight)
+	}
+
+	// compute and save the thumbnail
+
+	thumbnail := imaging.Thumbnail(source, thumbWidth, thumbHeight, imaging.Lanczos)
+
+	if err = imaging.Save(thumbnail, filepath); err != nil {
+		return errors.Wrapf(err, `could not save thumbnail to "%v"`, filepath)
+	}
+
+	return nil
 }

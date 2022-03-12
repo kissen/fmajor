@@ -98,13 +98,12 @@ main {
 
 img.preview {
     background-color: var(--accent-ink);
-    border-radius: 50%;
     border-style: solid;
     border-width: 1px;
     float: left;
-    height: 2em;
     margin-right: 0.5em;
-    width: 2em;
+    max-height: 2em;
+    max-width: 2em;
 }
 
 /* the login form */

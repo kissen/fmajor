@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"mime"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/kissen/fmajor/static"
@@ -120,7 +122,7 @@ func GetFavicon(w http.ResponseWriter, r *http.Request) {
 // Read out requested files for a request to /files/{file_id}/{file_name}
 // and write the headers to the response body. Used in both the GET and HEAD
 // requests to /files.
-func WriteHeadersForFile(w http.ResponseWriter, r *http.Request) (fm *File, ok bool) {
+func WriteHeadersForFileFromRequest(w http.ResponseWriter, r *http.Request) (fm *File, ok bool) {
 	// First parse out the requested file id from the request.
 
 	fileId, ok := mux.Vars(r)["file_id"]
@@ -146,54 +148,65 @@ func WriteHeadersForFile(w http.ResponseWriter, r *http.Request) (fm *File, ok b
 		return nil, false
 	}
 
-	// Set content type header. This is used by browser to determine how
-	// a given object is to be displayed (e.g. inline vs download).
+	// Set headers and return.
 
+	WriteHeadersFor(fm, w)
+	return fm, true
+}
+
+func WriteHeadersFor(fm *File, w http.ResponseWriter) {
 	contentType := fm.ContentType
+	inline := fm.Inline()
+	size := fm.Size
+	lastModified := fm.UploadedOnUTC
+	etag := fm.Id
+
+	WriteHeadersTo(w, contentType, etag, inline, lastModified, &size)
+}
+
+func WriteThumbnailHeadersFor(fm *File, w http.ResponseWriter) {
+	contentType := "image/jpeg"
+	inline := true
+	size := fm.ThumbnailSize
+	lastModified := fm.UploadedOnUTC
+	etag := fmt.Sprintf("%v-thumbnail", fm.Id)
+
+	WriteHeadersTo(w, contentType, etag, inline, lastModified, size)
+}
+
+func WriteHeadersTo(w http.ResponseWriter, contentType, etag string, inline bool, lastModified time.Time, size *int64) {
+	w.Header().Set("Cache-Control", "max-age=15552000")
 	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("ETag", etag)
 
-	// Set disposition header. This is so only safe content types are shown
-	// inline. In particular, we do not want to show HTML files as they would be
-	// served like a normal page rather than a download.
-
-	contentDisposition := "attachment"
-	if fm.Inline() {
-		contentDisposition = "inline"
+	if inline {
+		w.Header().Set("Content-Disposition", "inline")
+	} else {
+		w.Header().Set("Content-Disposition", "attachment")
 	}
 
-	w.Header().Set("Content-Disposition", contentDisposition)
-
-	// Set length header. Not really necessary as we aren't keeping the connection
-	// open, but it's nice to do so.
-
-	contentLength := strconv.FormatInt(fm.Size, 10)
-	w.Header().Set("Content-Length", contentLength)
-
-	// Set last-modified header. Browsers can use this information to determine
-	// whether a given object should be re-downloaded.
+	if size != nil {
+		contentLength := strconv.FormatInt(*size, 10)
+		w.Header().Set("Content-Length", contentLength)
+	}
 
 	rfc113 := "Mon, 02 Jan 2006 15:04:05 GMT"
-	lastModified := fm.UploadedOnUTC.Format(rfc113)
-	w.Header().Set("Last-Modified", lastModified)
-
-	// Set etag header. Similar to the last-modified header, browsers use this
-	// unique file id to check with their caches. The etag is an opaque unique
-	// id for a given file.  As such we can just use our uuid.
-
-	w.Header().Set("ETag", fm.Id)
-
-	// Our files are unique, so we set a very long expiry time for caches.
-	// Really we want browsers to cache our content as aggressively as they can.
-
-	w.Header().Set("Cache-Control", "max-age=15552000")
-
-	// Success! Return the file for further processing.
-
-	return fm, true
+	lastModifiedString := lastModified.Format(rfc113)
+	w.Header().Set("Last-Modified", lastModifiedString)
 }
 
 // GET /files/{file_id}/{file_name}
 func GetFile(w http.ResponseWriter, r *http.Request) {
+	DoFile(w, r, true)
+}
+
+// HEAD /files/{file_id}/{file_name}
+func HeadFile(w http.ResponseWriter, r *http.Request) {
+	DoFile(w, r, false)
+}
+
+// GET/HEAD /files/{file_id}/{file_name}
+func DoFile(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 	var (
 		fm  *File
 		ok  bool
@@ -209,7 +222,14 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 
 	// Write out headers.
 
-	if fm, ok = WriteHeadersForFile(w, r); !ok {
+	if fm, ok = WriteHeadersForFileFromRequest(w, r); !ok {
+		return
+	}
+
+	// If we are only serving a HEAD request, we really only have to care about
+	// the headers.
+
+	if !doSendBody {
 		return
 	}
 
@@ -228,19 +248,61 @@ func GetFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HEAD /files/{file_id}/{file_name}
-func HeadFile(w http.ResponseWriter, r *http.Request) {
-	// Acquire the lease. Technically there is a race condition between HEAD and
-	// GET request, but in practice the worst thing that can happen is that a
-	// deleted file will be shown as cached content by the browser.
+// GET /thumbnails/{file_id}/thumbnail.jpg
+func GetThumbnail(w http.ResponseWriter, r *http.Request) {
+	DoThumbnail(w, r, true)
+}
+
+// HEAD /thumbnails/{file_id}/thumbnail.jpg
+func HeadThumbnails(w http.ResponseWriter, r *http.Request) {
+	DoThumbnail(w, r, false)
+}
+
+// GET/HEAD /thumbnails/{file_id}/thumbnail.jpg
+func DoThumbnail(w http.ResponseWriter, r *http.Request, doSendBody bool) {
+	var (
+		err    error
+		fd     *os.File
+		fileId string
+		fm     *File
+		ok     bool
+	)
+
+	if fileId, ok = mux.Vars(r)["file_id"]; !ok {
+		DoError(w, r, http.StatusBadRequest, "missing file_id")
+		return
+	}
 
 	lease := LockRead()
 	defer lease.Unlock()
 
-	// Really we just have to write out the headers. WriteHeadersForFile handles
-	// all errors for us.
+	if fm, err = LoadFile(fileId); err != nil {
+		DoError(w, r, http.StatusNotFound, err.Error())
+		return
+	}
 
-	WriteHeadersForFile(w, r)
+	if fm.ThumbnailPath == nil {
+		DoError(w, r, http.StatusNotFound, "no thumbnail for given file")
+		return
+	}
+
+	WriteThumbnailHeadersFor(fm, w)
+
+	if !doSendBody {
+		return
+	}
+
+	if fd, err = os.Open(*fm.ThumbnailPath); err != nil {
+		DoError(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	defer fd.Close()
+	lease.Unlock()
+
+	if _, err = io.Copy(w, fd); err != nil {
+		log.Printf(`serving thumbnail for fileId="%v" failed with err="%v"`, fm.Id, err)
+	}
 }
 
 // POST /submit

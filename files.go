@@ -29,7 +29,12 @@ import (
 const MAX_THUMBNAIL_SOURCE_SIZE = 32 * units.MiB
 
 // Maximum width and height of a generated thumbnail in pixels.
-const MAX_THUMBNAIL_DIM = 100.0
+const MAX_THUMBNAIL_DIM = 128
+
+// Minimum width and height of a generated thumbnail in pixels. If the generated
+// thumbnail would be smaller (as to maintain aspect ratio), no thumbnail is
+// generated.
+const MIN_THUMBNAIL_DIM = 16
 
 // Contains all mime types for which File.Inline should return
 // true, that is those mime types that should be shown inline (in
@@ -85,6 +90,9 @@ type File struct {
 
 	// Absolute filepath to the thumbnail. May be nil.
 	ThumbnailPath *string
+
+	// Thumbnail size in bytes. May be nil.
+	ThumbnailSize *int64
 }
 
 // Return whether any of the fields are set to their zero-value.
@@ -292,11 +300,16 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 func DeleteFile(id string) error {
 	storageDir := GetConfig().UploadsDirectory
 	baseDir := filepath.Join(storageDir, id)
-	metaPath := filepath.Join(baseDir, "meta.json")
-	storagePath := filepath.Join(baseDir, "storage.bin")
 
+	metaPath := filepath.Join(baseDir, "meta.json")
 	metaErr := os.Remove(metaPath)
+
+	storagePath := filepath.Join(baseDir, "storage.bin")
 	storageErr := os.Remove(storagePath)
+
+	thumbnailPath := filepath.Join(baseDir, "thumbnail.jpg")
+	os.Remove(thumbnailPath) // thumbnail might not exist
+
 	rmdirErr := os.Remove(baseDir)
 
 	if metaErr != nil {
@@ -336,14 +349,17 @@ func DeleteFileAsync(id string) {
 
 		storageDir := GetConfig().UploadsDirectory
 		baseDir := filepath.Join(storageDir, id)
+
 		metaPath := filepath.Join(baseDir, "meta.json")
-		storagePath := filepath.Join(baseDir, "storage.bin")
-
 		os.Remove(metaPath)
-		os.Remove(storagePath)
-		err := os.Remove(baseDir)
 
-		if err != nil {
+		storagePath := filepath.Join(baseDir, "storage.bin")
+		os.Remove(storagePath)
+
+		thumbnailPath := filepath.Join(baseDir, "thumbnail.jpg")
+		os.Remove(thumbnailPath)
+
+		if err := os.Remove(baseDir); err != nil {
 			log.Printf(`could not clean up id="%v"`, id)
 		}
 	}()
@@ -352,6 +368,7 @@ func DeleteFileAsync(id string) {
 func createThumbnailFor(meta *File, filepath string) error {
 	var (
 		err    error
+		fi     os.FileInfo
 		fp     *os.File
 		source image.Image
 	)
@@ -394,7 +411,7 @@ func createThumbnailFor(meta *File, filepath string) error {
 	thumbWidth := int(float64(sourceWidth) * scale)
 	thumbHeight := int(float64(sourceHeight) * scale)
 
-	if thumbWidth <= 0 || thumbHeight <= 0 {
+	if thumbWidth < MIN_THUMBNAIL_DIM || thumbHeight < MIN_THUMBNAIL_DIM {
 		return fmt.Errorf("bad thumbnail dimensions %v x %v", thumbWidth, thumbHeight)
 	}
 
@@ -405,6 +422,17 @@ func createThumbnailFor(meta *File, filepath string) error {
 	if err = imaging.Save(thumbnail, filepath); err != nil {
 		return errors.Wrapf(err, `could not save thumbnail to "%v"`, filepath)
 	}
+
+	// update the thumbnail size
+
+	if fi, err = os.Stat(*meta.ThumbnailPath); err != nil {
+		return errors.Wrapf(err, `could not stat thumbnail for id="%v"`, meta.Id)
+	}
+
+	thumbnailSize := fi.Size()
+	meta.ThumbnailSize = &thumbnailSize
+
+	// success
 
 	return nil
 }

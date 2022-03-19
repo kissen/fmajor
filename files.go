@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"mime"
@@ -164,7 +165,11 @@ func Files() (uploads []*File, err error) {
 	}
 
 	for _, fi := range fis {
-		if !fi.IsDir() {
+		if isSymlink(fi) {
+			continue
+		}
+
+		if !isDir(fi) {
 			continue
 		}
 
@@ -435,4 +440,12 @@ func createThumbnailFor(meta *File, filepath string) error {
 	// success
 
 	return nil
+}
+
+func isSymlink(fi os.FileInfo) bool {
+	return (fi.Mode() & fs.ModeSymlink) != 0
+}
+
+func isDir(fi os.FileInfo) bool {
+	return fi.IsDir()
 }

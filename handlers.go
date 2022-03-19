@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"mime"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
@@ -317,28 +318,46 @@ func DoThumbnail(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 
 // POST /submit
 func PostSubmit(w http.ResponseWriter, r *http.Request) {
+	var (
+		createShortId bool
+		err           error
+		file          multipart.File
+		header        *multipart.FileHeader
+	)
+
+	// Only allow users to upload.
+
 	if authed := ErrorIfNotAuthorized(w, r); !authed {
 		return
 	}
 
+	// Get file contents.
+
 	r.Body = http.MaxBytesReader(w, r.Body, config.MaxFileSize)
 	r.ParseMultipartForm(16 * 1024 * 1024) // 16 MiB buffer
 
-	file, handler, err := r.FormFile("file")
-	if err != nil {
+	if file, header, err = r.FormFile("file"); err != nil {
 		DoError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
+
 	defer file.Close()
+
+	// Register file in bookkeeping.
+
+	if value := r.FormValue("create_short_id"); value == "true" {
+		createShortId = true
+	}
 
 	lease := LockWrite()
 	defer lease.Unlock()
 
-	_, err = CreateFile(file, handler.Filename)
-	if err != nil {
+	if _, err = CreateFile(file, header.Filename, createShortId); err != nil {
 		DoError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Forward to index page.
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }

@@ -58,10 +58,16 @@ function uploadButtonClicked() {
 		return
 	}
 
+	// Get file parameters
+
+	const createShortIdCheckbox = document.getElementById('create_short_id')
+
 	// Set up the form.
 
 	const form = new FormData()
+
 	form.append('file', file)
+	form.append('create_short_id', createShortIdCheckbox.checked)
 
 	// Set up the request.
 

@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/TwiN/go-away"
+	"github.com/dchest/uniuri"
 	"github.com/disintegration/imaging"
 	"github.com/docker/go-units"
 	"github.com/dustin/go-humanize"
@@ -94,6 +96,9 @@ type File struct {
 
 	// Thumbnail size in bytes. May be nil.
 	ThumbnailSize *int64
+
+	// Shortened Id.
+	ShortId *string
 }
 
 // Return whether any of the fields are set to their zero-value.
@@ -219,7 +224,7 @@ func LoadFile(id string) (*File, error) {
 // created file.
 //
 // Only call this function if you are holding the global write lock.
-func CreateFile(src io.Reader, filename string) (*File, error) {
+func CreateFile(src io.Reader, filename string, createShortId bool) (*File, error) {
 	// figure out meta data
 
 	id := uuid.New().String()
@@ -273,8 +278,17 @@ func CreateFile(src io.Reader, filename string) (*File, error) {
 		meta.ThumbnailPath = &thumbnailPath
 
 		if err = createThumbnailFor(&meta, thumbnailPath); err != nil {
-			log.Printf(`could not create thumbnail for id="%v": %v`, meta.Id, err.Error())
-			meta.ThumbnailPath = nil
+			DeleteFileAsync(id)
+			return nil, errors.Wrapf(err, "could not create thumbnail")
+		}
+	}
+
+	// create short link if requested
+
+	if createShortId {
+		if err = createShortIdFor(&meta); err != nil {
+			DeleteFile(id)
+			return nil, errors.Wrapf(err, "could not create short id")
 		}
 	}
 
@@ -440,6 +454,42 @@ func createThumbnailFor(meta *File, filepath string) error {
 	// success
 
 	return nil
+}
+
+func createShortIdFor(meta *File) error {
+	// First figure out to where we want to make a symlink.
+
+	storageDir := GetConfig().UploadsDirectory
+	targetDir := filepath.Join(storageDir, meta.Id)
+
+	// Now keep trying to get an acceptable short id.
+
+	lens := []int{3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 7, 8, 9}
+
+	for _, choiceLen := range lens {
+		linkName := createRandomString(choiceLen)
+		linkDir := filepath.Join(storageDir, linkName)
+
+		if err := os.Symlink(targetDir, linkDir); err == nil {
+			meta.ShortId = &linkName
+
+			return nil
+		}
+	}
+
+	// We found no unique id :'(
+
+	return errors.New("could not generate unique short id")
+}
+
+func createRandomString(len int) string {
+	choice := uniuri.NewLen(len)
+
+	for goaway.IsProfane(choice) {
+		choice = uniuri.NewLen(len)
+	}
+
+	return choice
 }
 
 func isSymlink(fi os.FileInfo) bool {

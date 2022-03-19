@@ -248,6 +248,29 @@ func DoFile(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 	}
 }
 
+// GET /f/{short_id}
+func GetShort(w http.ResponseWriter, r *http.Request) {
+	var (
+		err     error
+		meta    *File
+		ok      bool
+		shortId string
+	)
+
+	if shortId, ok = mux.Vars(r)["short_id"]; !ok {
+		DoError(w, r, http.StatusBadRequest, "missing short_id")
+		return
+	}
+
+	if meta, err = LoadFile(shortId); err != nil {
+		DoError(w, r, http.StatusNotFound, err.Error())
+		return
+	}
+
+	full := path.Join("/", "files", meta.Id, meta.Name)
+	http.Redirect(w, r, full, http.StatusMovedPermanently)
+}
+
 // GET /thumbnails/{file_id}/thumbnail.jpg
 func GetThumbnail(w http.ResponseWriter, r *http.Request) {
 	DoThumbnail(w, r, true)

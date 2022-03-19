@@ -17,6 +17,7 @@ func main() {
 	router.HandleFunc("/favicon.ico", GetFavicon).Methods("GET")
 	router.HandleFunc("/files/{file_id:.+}/{file_name:.+}", GetFile).Methods("GET")
 	router.HandleFunc("/files/{file_id:.+}/{file_name:.+}", HeadFile).Methods("HEAD")
+	router.HandleFunc("/f/{short_id:.+}", GetShort).Methods("GET")
 	router.HandleFunc("/thumbnails/{file_id:.+}/thumbnail.jpg", GetThumbnail).Methods("GET")
 	router.HandleFunc("/thumbnails/{file_id:.+}/thumbnail.jpg", GetThumbnail).Methods("HEAD")
 	router.HandleFunc("/static/{resource_id:.+}", GetStatic).Methods("GET")

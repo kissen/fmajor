@@ -119,41 +119,6 @@ func GetFavicon(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/static/paperclip.svg", http.StatusPermanentRedirect)
 }
 
-// Read out requested files for a request to /files/{file_id}/{file_name}
-// and write the headers to the response body. Used in both the GET and HEAD
-// requests to /files.
-func WriteHeadersForFileFromRequest(w http.ResponseWriter, r *http.Request) (fm *File, ok bool) {
-	// First parse out the requested file id from the request.
-
-	fileId, ok := mux.Vars(r)["file_id"]
-	if !ok {
-		DoError(w, r, http.StatusBadRequest, "missing file_id")
-		return nil, false
-	}
-
-	fileName, ok := mux.Vars(r)["file_name"]
-	if !ok {
-		DoError(w, r, http.StatusBadRequest, "missing file_name")
-		return nil, false
-	}
-
-	fm, err := LoadFile(fileId)
-	if err != nil {
-		DoError(w, r, http.StatusNotFound, err.Error())
-		return nil, false
-	}
-
-	if fileName != fm.Name {
-		DoError(w, r, http.StatusNotFound, "")
-		return nil, false
-	}
-
-	// Set headers and return.
-
-	WriteHeadersFor(fm, w)
-	return fm, true
-}
-
 func WriteHeadersFor(fm *File, w http.ResponseWriter) {
 	contentType := fm.ContentType
 	inline := fm.Inline()
@@ -208,11 +173,25 @@ func HeadFile(w http.ResponseWriter, r *http.Request) {
 // GET/HEAD /files/{file_id}/{file_name}
 func DoFile(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 	var (
-		fm  *File
-		ok  bool
-		fd  *os.File
-		err error
+		err      error
+		fd       *os.File
+		fileId   string
+		fileName string
+		fm       *File
+		ok       bool
 	)
+
+	// Write out headers.
+
+	if fileId, ok = mux.Vars(r)["file_id"]; !ok {
+		DoError(w, r, http.StatusBadRequest, "missing file_id")
+		return
+	}
+
+	if fileName, ok = mux.Vars(r)["file_name"]; !ok {
+		DoError(w, r, http.StatusBadRequest, "missing file_name")
+		return
+	}
 
 	// Aquire the lease so the underlying file does not get to change while we
 	// are serving it.
@@ -220,11 +199,19 @@ func DoFile(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 	lease := LockRead()
 	defer lease.Unlock()
 
-	// Write out headers.
+	// Get meta data struct and write out the respective headers to the client.
 
-	if fm, ok = WriteHeadersForFileFromRequest(w, r); !ok {
+	if fm, err = LoadFile(fileId); err != nil {
+		DoError(w, r, http.StatusNotFound, err.Error())
 		return
 	}
+
+	if fileName != fm.Name {
+		DoError(w, r, http.StatusNotFound, "bad file name")
+		return
+	}
+
+	WriteHeadersFor(fm, w)
 
 	// If we are only serving a HEAD request, we really only have to care about
 	// the headers.

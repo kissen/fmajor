@@ -88,6 +88,16 @@ func PostLogout(w http.ResponseWriter, r *http.Request) {
 
 // GET /static/{resource_id}
 func GetStatic(w http.ResponseWriter, r *http.Request) {
+	DoStatic(w, r, true)
+}
+
+// HEAD /static/{resource_id}
+func HeadStatic(w http.ResponseWriter, r *http.Request) {
+	DoStatic(w, r, false)
+}
+
+// GET/HEAD /static/{resource_id}
+func DoStatic(w http.ResponseWriter, r *http.Request, doSendHeader bool) {
 	var (
 		contents io.Reader
 		err      error
@@ -115,6 +125,12 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 	size := info.Size()
 
 	WriteHeadersTo(w, contentType, etag, lastModified, nil, &size)
+
+	// If we are only doing the header thing, quit here.
+
+	if !doSendHeader {
+		return
+	}
 
 	// Send out file.
 

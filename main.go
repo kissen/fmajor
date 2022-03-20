@@ -21,6 +21,7 @@ func main() {
 	router.HandleFunc("/thumbnails/{file_id:.+}/thumbnail.jpg", GetThumbnail).Methods("GET")
 	router.HandleFunc("/thumbnails/{file_id:.+}/thumbnail.jpg", GetThumbnail).Methods("HEAD")
 	router.HandleFunc("/static/{resource_id:.+}", GetStatic).Methods("GET")
+	router.HandleFunc("/static/{resource_id:.+}", HeadStatic).Methods("HEAD")
 	router.HandleFunc("/submit", PostSubmit).Methods("POST")
 	router.HandleFunc("/delete", PostDelete).Methods("POST")
 

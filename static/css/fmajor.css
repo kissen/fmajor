@@ -125,7 +125,7 @@ img.preview {
     width: 100%;
 }
 
-.login_form input[type="password"] {
+#password {
     letter-spacing: 0.3em;
     margin-bottom: 1em;
     padding: var(--small);
@@ -138,9 +138,13 @@ img.preview {
     justify-content: space-between;
 }
 
-.upload_form input[type="file"] {
+#file {
     font-size: var(--medium);
     width: 100%;
+}
+
+#create_short_id_container {
+    display: block;
 }
 
 #file_progress {

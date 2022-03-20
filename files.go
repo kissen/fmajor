@@ -53,16 +53,14 @@ func init() {
 
 	inlineMimeTypes = stringset.NewWith(
 		"audio/aac", "image/bmp", "text/css", "text/csv",
-		"application/epub+zip", "image/gif", "image/jpeg",
-		"text/javascript", "application/json",
-		"application/ld+json", "audio/midi", "audio/x-midi",
-		"text/javascript", "audio/mpeg", "video/mpeg",
-		"audio/ogg", "video/ogg", "application/ogg",
-		"audio/opus", "font/otf", "image/png",
-		"application/pdf", "image/svg+xml",
-		"application/x-shockwave-flash", "image/tiff",
-		"video/mp2t", "text/plain", "audio/wav", "audio/webm",
-		"video/webm", "image/webp", "application/xml",
+		"application/epub+zip", "image/gif", "image/jpeg", "text/javascript",
+		"application/json", "application/ld+json", "audio/midi", "audio/x-midi",
+		"text/javascript", "audio/mpeg", "video/mpeg", "audio/ogg", "video/ogg",
+		"application/ogg", "audio/opus", "font/otf", "image/png",
+		"application/pdf", "image/svg+xml", "application/x-shockwave-flash",
+		"image/tiff", "video/mp2t", "text/plain", "text/plain; charset=utf-8",
+		"audio/wav", "audio/webm", "video/webm", "image/webp",
+		"application/xml",
 	)
 
 	imageMimeTypes = stringset.NewWith(

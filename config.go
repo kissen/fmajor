@@ -18,6 +18,11 @@ type Config struct {
 	// something like "localhost:9090".
 	ListenAddress string
 
+	// Hostname the application is running under. Something like
+	// "files.example.com". fmajor needs this information for generating easily
+	// copyable short links.
+	HostName string
+
 	// The directory where to put files and metadata.
 	//
 	// The process running fmajor will need rw permissions
@@ -57,6 +62,10 @@ func GetConfig() *Config {
 func (c *Config) Error() error {
 	if c.ListenAddress == "" {
 		return errors.New("empty ListenAddress")
+	}
+
+	if c.HostName == "" {
+		return errors.New("empty Hostname")
 	}
 
 	if c.UploadsDirectory == "" {

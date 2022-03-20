@@ -158,6 +158,17 @@ func (f *File) HasThumbnail() bool {
 	return f.ThumbnailPath != nil
 }
 
+func (f *File) HasShortUrl() bool {
+	return f.ShortId != nil
+}
+
+func (f *File) ShortUrl() string {
+	host := GetConfig().HostName
+	id := f.ShortId
+
+	return path.Join(host, "f", *id)
+}
+
 // Get a listing of all uploaded files.
 //
 // Only call this function if you are holding the global read lock.

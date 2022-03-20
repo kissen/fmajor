@@ -159,6 +159,10 @@ img.preview {
     font-size: var(--small);
 }
 
+.short_link {
+    font-family: monospace;
+}
+
 /* our fancy image buttons */
 
 input[type="image"] {

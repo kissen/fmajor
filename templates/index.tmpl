@@ -35,6 +35,10 @@
 				<a href="/files/{{.Id}}/{{.Name}}" {{if not .Inline}}download{{end}}>{{.Name}}</a>
 				<div class="meta">
 					{{.HumanUploadedOn}} {{.HumanSize}}
+
+					{{if .HasShortUrl}}
+						<a class="short_link" href="/f/{{.ShortId}}">{{.ShortUrl}}</a>
+					{{end}}
 				</div>
 			</div>
 		</div>

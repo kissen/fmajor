@@ -10,16 +10,16 @@ import (
 	"path"
 )
 
-// go:embed css/*
+//go:embed css/*
 var css embed.FS
 
-// go:embed fonts/*
+//go:embed fonts/*
 var fonts embed.FS
 
-// go:embed js/*
+//go:embed js/*
 var js embed.FS
 
-// go:embed svg/*
+//go:embed svg/*
 var svg embed.FS
 
 func readFile(storage fs.FS, path string) (reader io.Reader, fi fs.FileInfo, err error) {
@@ -28,11 +28,15 @@ func readFile(storage fs.FS, path string) (reader io.Reader, fi fs.FileInfo, err
 		handle fs.File
 	)
 
+	// Open handle.
+
 	if handle, err = storage.Open(path); err != nil {
 		return nil, nil, err
 	}
 
 	defer handle.Close()
+
+	// Get meta data and contents.
 
 	if fi, err = handle.Stat(); err != nil {
 		return nil, nil, err
@@ -42,7 +46,15 @@ func readFile(storage fs.FS, path string) (reader io.Reader, fi fs.FileInfo, err
 		return nil, nil, err
 	}
 
-	return bytes.NewReader(bs), fi, nil
+	// Wrap up results in a nice present.
+
+	reader = bytes.NewReader(bs)
+
+	info := &staticFileType{
+		base: fi,
+	}
+
+	return bytes.NewReader(bs), info, nil
 }
 
 // Try to read file with given name in any of the /static directories.

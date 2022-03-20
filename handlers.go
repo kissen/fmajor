@@ -110,7 +110,7 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 	// Write headers.
 
 	contentType := mime.TypeByExtension(path.Ext(filename))
-	etag := fmt.Sprintf("%s-%v-%v", info.Name(), info.ModTime(), info.Size())
+	etag := static.EtagFor(info)
 	lastModified := info.ModTime()
 	size := info.Size()
 

@@ -249,7 +249,7 @@ func DoFile(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 
 	// Open actual file and serve it to the client.
 
-	if fd, err = os.Open(fm.LocalPath); err != nil {
+	if fd, err = os.Open(fm.LocalPath()); err != nil {
 		DoError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}

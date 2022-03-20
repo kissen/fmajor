@@ -88,9 +88,6 @@ type File struct {
 	// An infered content type for this file.
 	ContentType string
 
-	// Absolute filepath on the local machine.
-	LocalPath string
-
 	// Absolute filepath to the thumbnail. May be nil.
 	ThumbnailPath *string
 
@@ -117,10 +114,6 @@ func (f *File) HasZero() bool {
 	}
 
 	if f.ContentType == "" {
-		return true
-	}
-
-	if f.LocalPath == "" {
 		return true
 	}
 
@@ -167,6 +160,11 @@ func (f *File) ShortUrl() string {
 	id := f.ShortId
 
 	return path.Join(host, "f", *id)
+}
+
+func (f *File) LocalPath() string {
+	parent := GetConfig().UploadsDirectory
+	return filepath.Join(parent, f.Id, "storage.bin")
 }
 
 // Get a listing of all uploaded files.
@@ -276,7 +274,6 @@ func CreateFile(src io.Reader, filename string, createShortId bool) (*File, erro
 		Size:          nbytes,
 		UploadedOnUTC: time.Now().UTC(),
 		ContentType:   mime.TypeByExtension(path.Ext(filename)),
-		LocalPath:     storagePath,
 	}
 
 	if meta.ContentType == "" {
@@ -405,7 +402,7 @@ func createThumbnailFor(meta *File, filepath string) error {
 
 	// open image file
 
-	if fp, err = os.Open(meta.LocalPath); err != nil {
+	if fp, err = os.Open(meta.LocalPath()); err != nil {
 		return errors.Wrap(err, "could not open file")
 	}
 

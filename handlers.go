@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"mime"
 	"mime/multipart"
@@ -35,11 +36,11 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 
 	lease.Unlock()
 
-	vs := map[string]interface{}{
+	vs := map[string]any{
 		"Uploads": fs,
 	}
 
-	Render(w, r, "index.tmpl", vs)
+	Render(w, r, http.StatusOK, "index.tmpl", vs)
 }
 
 // GET /login
@@ -49,7 +50,7 @@ func GetLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Render(w, r, "login.tmpl", nil)
+	Render(w, r, http.StatusOK, "login.tmpl", nil)
 }
 
 // POST /login
@@ -87,9 +88,12 @@ func PostLogout(w http.ResponseWriter, r *http.Request) {
 
 // GET /static/{resource_id}
 func GetStatic(w http.ResponseWriter, r *http.Request) {
-	var filename string
-	var bytes []byte
-	var err error
+	var (
+		contents io.Reader
+		err      error
+		filename string
+		info     fs.FileInfo
+	)
 
 	// Open the file.
 
@@ -98,19 +102,23 @@ func GetStatic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bytes, err = static.ReadFile(filename); err != nil {
+	if contents, info, err = static.ReadFile(filename); err != nil {
 		DoError(w, r, http.StatusNotFound, "no resource with that name")
 		return
 	}
 
-	// Set mime type.
+	// Write headers.
 
-	mimetype := mime.TypeByExtension(path.Ext(filename))
-	w.Header().Add("Content-Type", mimetype)
+	contentType := mime.TypeByExtension(path.Ext(filename))
+	etag := fmt.Sprintf("%s-%v-%v", info.Name(), info.ModTime(), info.Size())
+	lastModified := info.ModTime()
+	size := info.Size()
+
+	WriteHeadersTo(w, contentType, etag, lastModified, nil, &size)
 
 	// Send out file.
 
-	if _, err := w.Write(bytes); err != nil {
+	if _, err := io.Copy(w, contents); err != nil {
 		log.Printf(`serving static filename="%v" failed with err="%v"`, filename, err)
 	}
 }
@@ -127,7 +135,7 @@ func WriteHeadersFor(fm *File, w http.ResponseWriter) {
 	lastModified := fm.UploadedOnUTC
 	etag := fm.Id
 
-	WriteHeadersTo(w, contentType, etag, inline, lastModified, &size)
+	WriteHeadersTo(w, contentType, etag, lastModified, &inline, &size)
 }
 
 func WriteThumbnailHeadersFor(fm *File, w http.ResponseWriter) {
@@ -137,18 +145,20 @@ func WriteThumbnailHeadersFor(fm *File, w http.ResponseWriter) {
 	lastModified := fm.UploadedOnUTC
 	etag := fmt.Sprintf("%v-thumbnail", fm.Id)
 
-	WriteHeadersTo(w, contentType, etag, inline, lastModified, size)
+	WriteHeadersTo(w, contentType, etag, lastModified, &inline, size)
 }
 
-func WriteHeadersTo(w http.ResponseWriter, contentType, etag string, inline bool, lastModified time.Time, size *int64) {
+func WriteHeadersTo(w http.ResponseWriter, contentType, etag string, lastModified time.Time, inline *bool, size *int64) {
 	w.Header().Set("Cache-Control", "max-age=15552000")
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("ETag", etag)
 
-	if inline {
-		w.Header().Set("Content-Disposition", "inline")
-	} else {
-		w.Header().Set("Content-Disposition", "attachment")
+	if inline != nil {
+		if *inline {
+			w.Header().Set("Content-Disposition", "inline")
+		} else {
+			w.Header().Set("Content-Disposition", "attachment")
+		}
 	}
 
 	if size != nil {
@@ -411,13 +421,13 @@ func ErrorIfNotAuthorized(w http.ResponseWriter, r *http.Request) (authed bool) 
 // Return an error handler for status.
 func Error(status int, cause string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vs := map[string]interface{}{
+		vs := map[string]any{
 			"Status":      status,
 			"StatusText":  http.StatusText(status),
 			"Description": httpstatus.Describe(status),
 			"Cause":       cause,
 		}
 
-		Render(w, r, "error.tmpl", vs)
+		Render(w, r, status, "error.tmpl", vs)
 	}
 }

@@ -154,9 +154,13 @@ The affected files are
 
 ### Fonts
 
-This repository contains file `/static/fonts/goregular.woff` which is based on the open source
-[Go Regular](https://github.com/golang/image/tree/master/font/gofont/ttfs) font.
-Go Regular is distributed under the following conditions.
+This repository includes fonts from the [golang/image][0] repository.
+
+* `/static/fonts/Go-Regular.woff` is based on font [Go Regular][1].
+
+* `/static/fonts/Go-Mono.woff` is based on font [Go Mono][2].
+
+Both fonts are distributed under the following terms and conditions.
 
     These fonts were created by the Bigelow & Holmes foundry specifically for the
     Go project. See https://blog.golang.org/go-fonts for details.
@@ -194,3 +198,7 @@ Go Regular is distributed under the following conditions.
     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
     OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+[0]: https://github.com/golang/image
+[1]: https://github.com/golang/image/blob/a8550c1d254a56cf1762a2993881d2b23c0c83dd/font/gofont/ttfs/Go-Regular.ttf
+[2]: https://github.com/golang/image/blob/a8550c1d254a56cf1762a2993881d2b23c0c83dd/font/gofont/ttfs/Go-Mono.ttf

@@ -12,12 +12,17 @@
 }
 
 @font-face {
-    font-family: "goregular";
-    src: url("/static/goregular.woff") format("woff");
+    font-family: "Go Regular";
+    src: url("/static/Go-Regular.woff") format("woff");
+}
+
+@font-face {
+    font-family: "Go Mono";
+    src: url("/static/Go-Mono.woff") format("woff");
 }
 
 * {
-    font-family: "goregular", "Helvetica", "Arial", sans-serif;
+    font-family: "Go Regular", "Helvetica", "Arial", sans-serif;
     padding: 0;
     margin: 0;
 }
@@ -160,7 +165,7 @@ img.preview {
 }
 
 .short_link {
-    font-family: monospace;
+    font-family: "Go Mono", monospace;
 }
 
 /* our fancy image buttons */

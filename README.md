@@ -25,11 +25,13 @@ to install.
 
 ## Building
 
-Assuming you have `go` version 1.17 or later, you should only have to run
+You will need `go` version 1.18 or later. With `go` on your `PATH`, you should
+only have to run
 
     $ go install github.com/kissen/fmajor@latest
 
-You should now have `fmajor` available on your system.
+Above command installs the `fmajor` binary to `$GOPATH/bin`. If you do not have
+`$GOPATH` set, [`$GOPATH` defaults to `$HOME/go` on Linux and macOS][0].
 
 ## Setup With `systemd`
 
@@ -51,7 +53,7 @@ you know how to proxy and secure HTTP services with something like
    This creates a user named `fmajor` with home directory `/var/lib/fmajor`
    which is where we will let `fmajor` put all its uploads.
 
-4. Copy the configuration file to `/etc`.
+4. Copy the default configuration file to `/etc`.
 
         # wget https://raw.githubusercontent.com/kissen/fmajor/master/doc/fmajor.conf
         # mv fmajor.conf /etc/fmajor.conf
@@ -98,12 +100,10 @@ you know how to proxy and secure HTTP services with something like
         # systemctl enable fmajor
 
 
-8. `fmajor` listens to the `ListenAddress` defined in configuration
-   file `/etc/fmajor.conf`. Per default, this is `localhost` which of
-   course isn't very useful if you want to access the service
-   remotely. To make `fmajor` accessible on the open internet,
-   configure your reverse proxy (e.g. `nginx`) to forward requests to
-   `ListenAddress`.
+8. `fmajor` listens to the `ListenAddress` defined in configuration file
+   `/etc/fmajor.conf`. Per default, this is `localhost` which of course isn't
+   very useful.  To make `fmajor` accessible on the open internet, configure
+   your reverse proxy (e.g. `nginx`) to forward requests to `ListenAddress`.
 
    You should configure your reverse proxy to use HTTPS, otherwise
    third parties will be able to spy on your interactions with
@@ -121,8 +121,8 @@ later version. For a copy of this license, see `LICENSE`.
 
 ### Feather Icons
 
-Above applies only to the source code. Excluded are included icons derived from
-the [Feather](https://feathericons.com/) icon set licensed under the following
+Excluded from above copyright notice are included icons derived from the
+[Feather](https://feathericons.com/) icon set licensed under the following
 terms.
 
     The MIT License (MIT)
@@ -154,11 +154,11 @@ The affected files are
 
 ### Fonts
 
-This repository includes fonts from the [golang/image][0] repository.
+This repository includes fonts from the [golang/image][1] repository.
 
-* `/static/fonts/Go-Regular.woff` is based on font [Go Regular][1].
+* `/static/fonts/Go-Regular.woff` is based on font [Go Regular][2].
 
-* `/static/fonts/Go-Mono.woff` is based on font [Go Mono][2].
+* `/static/fonts/Go-Mono.woff` is based on font [Go Mono][3].
 
 Both fonts are distributed under the following terms and conditions.
 
@@ -199,6 +199,7 @@ Both fonts are distributed under the following terms and conditions.
     OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[0]: https://github.com/golang/image
-[1]: https://github.com/golang/image/blob/a8550c1d254a56cf1762a2993881d2b23c0c83dd/font/gofont/ttfs/Go-Regular.ttf
-[2]: https://github.com/golang/image/blob/a8550c1d254a56cf1762a2993881d2b23c0c83dd/font/gofont/ttfs/Go-Mono.ttf
+[0]: https://go.dev/doc/gopath_code#GOPATH
+[1]: https://github.com/golang/image
+[2]: https://github.com/golang/image/blob/a8550c1d254a56cf1762a2993881d2b23c0c83dd/font/gofont/ttfs/Go-Regular.ttf
+[3]: https://github.com/golang/image/blob/a8550c1d254a56cf1762a2993881d2b23c0c83dd/font/gofont/ttfs/Go-Mono.ttf

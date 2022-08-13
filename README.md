@@ -150,7 +150,7 @@ terms.
 The affected files are
 
     /static/svg/trash-2.svg /static/svg/paperclip.svg /static/svg/upload-cloud.svg
-    /static/svg/log-out.svg /static/svg/x-octagon.svg
+    /static/svg/log-out.svg
 
 ### Fonts
 

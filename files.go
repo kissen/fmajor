@@ -86,10 +86,7 @@ type File struct {
 	// An infered content type for this file.
 	ContentType string
 
-	// Absolute filepath to the thumbnail. May be nil.
-	ThumbnailPath *string
-
-	// Thumbnail size in bytes. May be nil.
+	// Thumbnail size in bytes. Nil when there is no thumbnail.
 	ThumbnailSize *int64
 
 	// Shortened Id.
@@ -146,7 +143,13 @@ func (f *File) IsImage() bool {
 }
 
 func (f *File) HasThumbnail() bool {
-	return f.ThumbnailPath != nil
+	return f.ThumbnailSize != nil
+}
+
+// Return path on local file system to this file's thumbnail. Note that
+// this thumbnail is not guranteed to exist.
+func (f *File) LocalThumbnailPath() string {
+	return f.pathTo("thumbnail.jpg")
 }
 
 func (f *File) HasShortUrl() bool {
@@ -161,8 +164,7 @@ func (f *File) ShortUrl() string {
 }
 
 func (f *File) LocalPath() string {
-	parent := GetConfig().UploadsDirectory
-	return filepath.Join(parent, f.Id, "storage.bin")
+	return f.pathTo("storage.bin")
 }
 
 // Get a listing of all uploaded files.
@@ -240,7 +242,6 @@ func CreateFile(src io.Reader, filename string, createShortId bool) (*File, erro
 	baseDir := filepath.Join(storageDir, id)
 	metaPath := filepath.Join(baseDir, "meta.json")
 	storagePath := filepath.Join(baseDir, "storage.bin")
-	thumbnailPath := filepath.Join(baseDir, "thumbnail.jpg")
 
 	// create the directory where all related files are going to be stored
 
@@ -281,9 +282,7 @@ func CreateFile(src io.Reader, filename string, createShortId bool) (*File, erro
 	// create thumbnail if necessary
 
 	if meta.IsImage() {
-		meta.ThumbnailPath = &thumbnailPath
-
-		if err = createThumbnailFor(&meta, thumbnailPath); err != nil {
+		if err = createThumbnailFor(&meta, baseDir); err != nil {
 			DeleteFileAsync(id)
 			return nil, errors.Wrapf(err, "could not create thumbnail")
 		}
@@ -390,7 +389,16 @@ func DeleteFileAsync(id string) {
 	}()
 }
 
-func createThumbnailFor(meta *File, filepath string) error {
+// Return a local file system path to some file in this file's storage
+// directory.
+func (f *File) pathTo(child string) string {
+	parent := GetConfig().UploadsDirectory
+	return filepath.Join(parent, f.Id, child)
+}
+
+// Render and store a thumbnail for file meta. The thumbnail will be written
+// to file thumbnail.jpg in directory baseDir.
+func createThumbnailFor(meta *File, baseDir string) error {
 	var (
 		err    error
 		fi     os.FileInfo
@@ -443,14 +451,15 @@ func createThumbnailFor(meta *File, filepath string) error {
 	// compute and save the thumbnail
 
 	thumbnail := imaging.Thumbnail(source, thumbWidth, thumbHeight, imaging.Lanczos)
+	thumbnailPath := filepath.Join(baseDir, "thumbnail.jpg")
 
-	if err = imaging.Save(thumbnail, filepath); err != nil {
-		return errors.Wrapf(err, `could not save thumbnail to "%v"`, filepath)
+	if err = imaging.Save(thumbnail, thumbnailPath); err != nil {
+		return errors.Wrapf(err, `could not save thumbnail to "%v"`, thumbnailPath)
 	}
 
 	// update the thumbnail size
 
-	if fi, err = os.Stat(*meta.ThumbnailPath); err != nil {
+	if fi, err = os.Stat(thumbnailPath); err != nil {
 		return errors.Wrapf(err, `could not stat thumbnail for id="%v"`, meta.Id)
 	}
 

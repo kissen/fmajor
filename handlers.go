@@ -318,7 +318,7 @@ func DoThumbnail(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 		return
 	}
 
-	if fm.ThumbnailPath == nil {
+	if !fm.HasThumbnail() {
 		DoError(w, r, http.StatusNotFound, "no thumbnail for given file")
 		return
 	}
@@ -329,7 +329,7 @@ func DoThumbnail(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 		return
 	}
 
-	if fd, err = os.Open(*fm.ThumbnailPath); err != nil {
+	if fd, err = os.Open(fm.LocalThumbnailPath()); err != nil {
 		DoError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}

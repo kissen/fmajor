@@ -472,27 +472,22 @@ func createThumbnailFor(meta *File, baseDir string) error {
 }
 
 func createShortIdFor(meta *File) error {
-	// First figure out to where we want to make a symlink.
+	// keep trying to get an acceptable short id
 
 	storageDir := GetConfig().UploadsDirectory
-	targetDir := filepath.Join(storageDir, meta.Id)
-
-	// Now keep trying to get an acceptable short id.
-
 	lens := []int{3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 7, 8, 9}
 
 	for _, choiceLen := range lens {
 		linkName := createRandomString(choiceLen)
-		linkDir := filepath.Join(storageDir, linkName)
+		link := filepath.Join(storageDir, linkName)
 
-		if err := os.Symlink(targetDir, linkDir); err == nil {
+		if err := os.Symlink(meta.Id, link); err == nil {
 			meta.ShortId = &linkName
-
 			return nil
 		}
 	}
 
-	// We found no unique id :'(
+	// we found no unique id :'(
 
 	return errors.New("could not generate unique short id")
 }

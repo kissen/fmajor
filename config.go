@@ -90,8 +90,9 @@ func loadConfig() {
 	// report an error right away as a later file might be available
 
 	var errs []error
+	var path string
 
-	for _, path := range configPaths() {
+	for _, path = range configPaths() {
 		if c, err := loadConfigFrom(path); err != nil {
 			errs = append(errs, err)
 		} else {
@@ -110,6 +111,8 @@ func loadConfig() {
 
 		log.Fatal("missing valid configuration file, maybe supply one with the -c flag")
 	}
+
+	log.Printf("loaded configuration file from path=%v", path)
 }
 
 // Return a collection of filepaths where we may find a configuration

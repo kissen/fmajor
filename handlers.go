@@ -135,7 +135,7 @@ func DoStatic(w http.ResponseWriter, r *http.Request, doSendHeader bool) {
 	// Send out file.
 
 	if _, err := io.Copy(w, contents); err != nil {
-		log.Printf(`serving static filename="%v" failed with err="%v"`, filename, err)
+		log.Printf(`serving static filename="%v" failed: %v"`, filename, err)
 	}
 }
 
@@ -258,7 +258,7 @@ func DoFile(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 	lease.Unlock()
 
 	if _, err := io.Copy(w, fd); err != nil {
-		log.Printf(`serving fileId="%v" failed with err="%v"`, fm.Id, err)
+		log.Printf(`serving fileId="%v" failed: %v`, fm.Id, err)
 	}
 }
 
@@ -338,7 +338,7 @@ func DoThumbnail(w http.ResponseWriter, r *http.Request, doSendBody bool) {
 	lease.Unlock()
 
 	if _, err = io.Copy(w, fd); err != nil {
-		log.Printf(`serving thumbnail for fileId="%v" failed with err="%v"`, fm.Id, err)
+		log.Printf(`serving thumbnail for fileId="%v" failed: %v`, fm.Id, err)
 	}
 }
 

@@ -7,7 +7,6 @@ require (
 	github.com/TwiN/go-away v1.6.13
 	github.com/dchest/uniuri v1.2.0
 	github.com/disintegration/imaging v1.6.2
-	github.com/docker/go-units v0.5.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1

@@ -19,7 +19,6 @@ import (
 	"github.com/TwiN/go-away"
 	"github.com/dchest/uniuri"
 	"github.com/disintegration/imaging"
-	"github.com/docker/go-units"
 	"github.com/dustin/go-humanize"
 	"github.com/google/uuid"
 	"github.com/kissen/stringset"
@@ -29,7 +28,7 @@ import (
 // Maximum size an image may be for us to compute a thumbnail.  Unfortunately we
 // have to load all of the image into memory before we can compute the thumbnail
 // so this limitation is necessary.
-const MAX_THUMBNAIL_SOURCE_SIZE = 32 * units.MiB
+const MAX_THUMBNAIL_SOURCE_SIZE = 32 * humanize.MiByte
 
 // Maximum width and height of a generated thumbnail in pixels.
 const MAX_THUMBNAIL_DIM = 128

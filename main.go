@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.Lshortfile)
+	log.SetOutput(&LogWriter{})
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", GetIndex).Methods("GET")
